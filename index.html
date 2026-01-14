@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Kewangan & Faraid Keluarga (Secure)</title>
+    
+    <style>
+        /* --- STYLE ASAL FARAID ONLINE --- */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        h2 { color: #2c3e50; } 
+        h3 { color: #2c3e50; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px; font-size: 16px;}
+        
+        /* Form & Input */
+        .input-container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; } 
+        label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        
+        /* Buttons */
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 5px;}
+        .btn-add { background-color: #27ae60; color: white; } 
+        .btn-export { background-color: #2e86c1; color: white; } 
+        .btn-pdf { background-color: #8e44ad; color: white; }
+        .btn-logout { background-color: #c0392b; color: white; float: right; margin-bottom: 20px; }
+        .btn-login { background-color: #4285F4; color: white; font-size: 16px; padding: 15px 30px; }
+
+        /* Tables */
+        .table-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
+        table { width: 100%; border-collapse: collapse; font-size: 13px; } 
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+        th { background-color: #2c3e50; color: white; text-align: center; white-space: nowrap; position: sticky; top: 0; }
+        tr:nth-child(even) { background-color: #f9f9f9; } 
+        tr:hover { background-color: #f1f1f1; }
+        
+        /* Column Specific Colors */
+        .col-date { text-align: center; background-color: #ecf0f1; width: 100px; color: #000; font-weight: bold;} 
+        .col-cat { text-align: center; background-color: #eaf2f8; width: 120px; font-weight: bold; color: #2471a3;}
+        .col-felda { text-align: center; background-color: #d6eaf8; width: 120px; color: #154360;}
+        .col-desc { text-align: left; background-color: #ecf0f1; width: 250px; color: #000; font-weight: bold;} 
+        .col-masuk { background-color: #e8f8f5; font-weight: bold; color: green; } 
+        .col-keluar { background-color: #fdedec; font-weight: bold; color: red; } 
+        .col-baki { background-color: #fff3cd; font-weight: bold; color: #000;} 
+        .col-clean { background-color: #eafaf1; font-weight: bold; color: #0099ff; }
+
+        /* Summary Tables */
+        .summary-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 5px; margin-bottom: 20px; }
+        .summary-table { width: 100%; } 
+        .summary-table th { background-color: #34495e; color: white; padding: 8px; border: 1px solid #555;}
+        .col-sum-masuk { background-color: #d5f5e3; font-weight: bold; color: #196f3d; } 
+        .col-kos { background-color: #eaecee; color: #555; } 
+        .col-pusaka { background-color: #a9cce3; border-left: 2px solid #333; color: #000; font-weight: bold; } 
+        .col-waris { background-color: #f4f6f7; }
+        .pic-ijat { background-color: #d4e6f1; color: #154360; font-weight: bold; border-left: 2px solid #000; } 
+        .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000;}
+        .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
+
+        /* --- LOGIN PAGE STYLES --- */
+        #loginContainer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ecf0f1; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        #mainApp { display: none; } /* Sorok app asal mula-mula */
+
+        @media print {
+            .btn-logout, #loginContainer { display: none !important; }
+            @page { size: landscape; margin: 5mm; } 
+            body { background-color: white; padding: 0; font-family: sans-serif; -webkit-print-color-adjust: exact; zoom: 55%; }
+            .input-container, .btn-clear, .summary-box { display: none !important; } 
+            .table-wrapper, .summary-wrapper { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
+            table { min-width: auto; width: 100%; font-size: 11px; } 
+            th { background-color: #ccc !important; color: black !important; -webkit-print-color-adjust: exact; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loginContainer">
+        <h2 style="margin-bottom: 20px;">Sistem Faraid Keluarga</h2>
+        <p style="margin-bottom: 30px; color: #666;">Sila login menggunakan Google untuk akses.</p>
+        <button class="btn-login" onclick="window.loginGoogle()">🔐 Login dengan Google</button>
+        <p id="loginMsg" style="color: red; margin-top: 15px;"></p>
+    </div>
+
+    <div id="mainApp">
+        <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
+        <h2>Sistem Kewangan & Faraid Keluarga (ONLINE)</h2>
+        
+        <div class="input-container">
+            <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
+            <div class="form-group"><label>Kategori</label><select id="inputCategory" onchange="toggleFeldaInput()"><option value="Hasil Kebun">Hasil Kebun</option><option value="Lain-lain">Lain-lain</option></select></div>
+            <div class="form-group"><label>Tarikh Resit Felda</label><input type="date" id="inputFeldaDate"></div>
+            <div class="form-group"><label>Catatan</label><input type="text" id="inputDesc" placeholder="Contoh: Jualan Durian" style="width: 200px;"></div>
+            <div class="form-group"><label>MASUK (RM)</label><input type="number" id="inputMasuk" placeholder="0.00" oninput="toggleInput('masuk')" style="width: 100px;"></div>
+            <div class="form-group"><label>KELUAR (RM)</label><input type="number" id="inputKeluar" placeholder="0.00" oninput="toggleInput('keluar')" style="width: 100px;"></div>
+            <button class="btn-add" onclick="window.addData()">+ Tambah (Cloud)</button>
+            <button class="btn-export" onclick="downloadExcelXML()">Excel (3 Sheets)</button>
+            <button class="btn-pdf" onclick="window.print()">🖨️ PDF</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th class="col-date">Tarikh</th><th class="col-cat">Kategori</th><th class="col-felda">Tarikh Resit<br>Felda</th><th class="col-desc">Catatan</th>
+                        <th class="col-masuk">Masuk (RM)</th><th class="col-keluar">Keluar (RM)</th><th class="col-baki">Baki Akaun (RM)</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"><tr><td colspan="8" style="text-align:center">Sedang memuatkan data...</td></tr></tbody>
+            </table>
+        </div>
+
+        <h3>1. Ringkasan Kos & Pembahagian Kasar (Resit Felda)</h3>
+        <div class="summary-wrapper">
+            <table class="summary-table">
+                <thead>
+                    <tr><th rowspan="2">Bulan</th><th rowspan="2" class="col-sum-masuk">Jumlah Masuk</th><th colspan="4" style="background:#555">Tolakan Kos</th><th rowspan="2" class="col-pusaka">Mak (1/2)</th><th rowspan="2" class="col-pusaka">Pusaka (1/2)</th></tr>
+                    <tr><th class="col-kos">10% Wak Aji</th><th class="col-kos">20% Selenggara</th><th class="col-kos">Kos Tetap (800)</th><th class="col-clean">Bersih</th></tr>
+                </thead>
+                <tbody id="summaryBodyCost"></tbody>
+            </table>
+        </div>
+
+        <h3>2. Perincian Agihan Faraid & PIC</h3>
+        <div class="summary-wrapper">
+            <table class="summary-table">
+                <thead>
+                    <tr><th rowspan="2">Bulan</th><th colspan="8" style="background:#444">Agihan Faraid (2304)</th><th rowspan="2" class="pic-ijat">PIC IJAT</th><th rowspan="2" class="pic-ena">PIC ENA</th></tr>
+                    <tr><th class="col-waris">Mak</th><th class="col-waris">Yati</th><th class="col-waris">Ela</th><th class="col-waris">Ijat</th><th class="col-waris">Ina</th><th class="col-waris">Pah</th><th class="col-waris">Kila</th><th class="col-waris">Ayed</th></tr>
+                </thead>
+                <tbody id="summaryBodyDist"></tbody>
+            </table>
+        </div>
+
+        <div class="summary-box">
+            <strong>Status Online:</strong> Log masuk sebagai <span id="userEmailDisplay" style="font-weight:bold; color:blue;"></span>.
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- GANTI CONFIG FIREBASE ANDA DI SINI ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaGpKuDs8d3-n5ulueMUInoZhxSRkQXWY",
+            authDomain: "myfaraid.firebaseapp.com",
+            projectId: "myfaraid",
+            storageBucket: "myfaraid.firebasestorage.app",
+            messagingSenderId: "1077346668678",
+            appId: "1:1077346668678:web:d85d5dde3dc9c743f10107"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const tablesCollection = collection(db, "transaksi_faraid");
+
+        // --- SENARAI EMAIL DIBENARKAN ---
+        const allowedEmails = [
+            "isye99@gmail.com",
+            "sysuhaila@gmail.com",
+            // Tambah email lain di sini
+        ];
+
+        let unsubscribeSnapshot = null; // Untuk stop listener bila logout
+
+        // --- AUTH FUNCTIONS ---
+        window.loginGoogle = async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                if (!allowedEmails.includes(result.user.email)) {
+                    document.getElementById('loginMsg').innerText = "Maaf, email ini tiada akses.";
+                    await signOut(auth);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Login Error: " + error.message);
+            }
+        };
+
+        window.logout = async () => {
+            if(confirm("Anda pasti mahu log keluar?")) {
+                if(unsubscribeSnapshot) unsubscribeSnapshot(); // Stop baca data
+                await signOut(auth);
+            }
+        };
+
+        // --- STATE LISTENER ---
+        onAuthStateChanged(auth, user => {
+            const loginDiv = document.getElementById("loginContainer");
+            const appDiv = document.getElementById("mainApp");
+
+            if (user && allowedEmails.includes(user.email)) {
+                // User sah -> Tunjuk App
+                loginDiv.style.display = "none";
+                appDiv.style.display = "block";
+                document.getElementById('userEmailDisplay').innerText = user.email;
+                initApp(); // Mula baca data
+            } else {
+                // User tak sah / belum login -> Tunjuk Login
+                loginDiv.style.display = "flex";
+                appDiv.style.display = "none";
+            }
+        });
+
+        // --- MAIN APP LOGIC (Hanya jalan bila dah login) ---
+        function initApp() {
+            // Setup Real-time Listener
+            const q = query(tablesCollection, orderBy("timestamp", "asc"));
+            
+            // Simpan reference supaya boleh stop bila logout
+            unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+                let records = [];
+                snapshot.forEach((doc) => {
+                    records.push({ id: doc.id, ...doc.data() });
+                });
+                renderTable(records);
+            }, (error) => {
+                console.error("Error reading data:", error);
+                alert("Gagal membaca data. Sila periksa permission database.");
+            });
+        }
+
+        // --- CRUD OPERATIONS ---
+        window.addData = async function() {
+            const btn = document.querySelector('.btn-add');
+            btn.innerText = "Sedang Simpan..."; btn.disabled = true;
+
+            const date = document.getElementById('inputDate').value;
+            const category = document.getElementById('inputCategory').value;
+            const feldaDate = document.getElementById('inputFeldaDate').value;
+            const desc = document.getElementById('inputDesc').value;
+            let masuk = parseFloat(document.getElementById('inputMasuk').value) || 0;
+            let keluar = parseFloat(document.getElementById('inputKeluar').value) || 0;
+
+            if (!date || (masuk === 0 && keluar === 0)) {
+                alert("Sila masukkan Tarikh dan nilai Masuk/Keluar.");
+                btn.innerText = "+ Tambah (Cloud)"; btn.disabled = false; return;
+            }
+
+            try {
+                await addDoc(tablesCollection, {
+                    timestamp: Date.now(),
+                    date, category, feldaDate, desc, masuk, keluar,
+                    createdBy: auth.currentUser.email // Rekod siapa yang key-in
+                });
+                
+                // Reset Form
+                document.getElementById('inputDesc').value = '';
+                document.getElementById('inputMasuk').value = '';
+                document.getElementById('inputKeluar').value = '';
+                alert("Berjaya disimpan!");
+            } catch (e) {
+                console.error("Error: ", e);
+                alert("Gagal menyimpan.");
+            }
+            btn.innerText = "+ Tambah (Cloud)"; btn.disabled = false;
+        }
+
+        window.deleteRow = async function(id) {
+            if(confirm("Padam rekod ini dari Database Online?")) {
+                await deleteDoc(doc(db, "transaksi_faraid", id));
+            }
+        }
+
+        // --- RENDER & CALCULATION LOGIC (Sama macam fail asal) ---
+        function renderTable(records) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            let runningBalance = 0;
+
+            records.forEach((r) => {
+                runningBalance += parseFloat(r.masuk) - parseFloat(r.keluar);
+
+                let row = `<tr>
+                    <td class="col-date">${r.date}</td>
+                    <td class="col-cat">${r.category}</td>
+                    <td class="col-felda">${r.feldaDate || '-'}</td>
+                    <td class="col-desc">${r.desc} <br><small style="color:#888; font-size:10px;">By: ${r.createdBy || 'Unknown'}</small></td>
+                    <td class="col-masuk">${r.masuk > 0 ? r.masuk.toFixed(2) : '-'}</td>
+                    <td class="col-keluar">${r.keluar > 0 ? r.keluar.toFixed(2) : '-'}</td>
+                    <td class="col-baki">${runningBalance.toFixed(2)}</td>
+                    <td style="text-align:center">
+                        <button onclick="deleteRow('${r.id}')" style="background:red; color:white; padding:2px 5px; font-size:10px;">X</button>
+                    </td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+
+            renderSummary(records);
+            window.globalRecords = records; 
+            window.globalSummaryData = generateSummaryData(records); 
+        }
+
+        function generateSummaryData(records) {
+            let summaryData = {};
+            records.forEach(r => {
+                if (r.category === 'Hasil Kebun' && r.feldaDate && r.masuk > 0) {
+                    const monthKey = r.feldaDate.substring(0, 7); 
+                    if (!summaryData[monthKey]) summaryData[monthKey] = 0;
+                    summaryData[monthKey] += parseFloat(r.masuk);
+                }
+            });
+            
+            let resultList = [];
+            Object.keys(summaryData).sort().forEach(monthKey => {
+                const totalMasuk = summaryData[monthKey];
+                // KIRAAN FARAID (HARDCODED LOGIC)
+                const wakAji = totalMasuk * 0.10;
+                const selenggara = totalMasuk * 0.20;
+                const targetFixedCost = 800;
+                let grossAvailable = totalMasuk - wakAji - selenggara;
+                let fixedCost = grossAvailable < targetFixedCost ? grossAvailable : targetFixedCost;
+                if(fixedCost < 0) fixedCost = 0;
+                let bersih = grossAvailable - fixedCost;
+                if(bersih < 0) bersih = 0;
+
+                const makHalf = bersih / 2;     
+                const pusakaAbah = bersih / 2;  
+
+                const sMak = (400 / 2304) * pusakaAbah;
+                const sYati = (336 / 2304) * pusakaAbah;
+                const sEla = (336 / 2304) * pusakaAbah;
+                const sIjat = (672 / 2304) * pusakaAbah;
+                const sIna = (84 / 2304) * pusakaAbah;
+                const sPah = (119 / 2304) * pusakaAbah;
+                const sKila = (119 / 2304) * pusakaAbah;
+                const sAyed = (238 / 2304) * pusakaAbah;
+
+                const picIjat = makHalf + sMak + sYati + sEla + sIjat;
+                const picEna = sIna + sPah + sKila + sAyed;
+                
+                let monthName = monthKey;
+                try { monthName = new Date(monthKey + "-01").toLocaleDateString('ms-MY', { year: 'numeric', month: 'long' }); } catch(e) {}
+
+                resultList.push({
+                    monthName, totalMasuk, wakAji, selenggara, fixedCost, bersih, makHalf, pusakaAbah,
+                    sMak, sYati, sEla, sIjat, sIna, sPah, sKila, sAyed, picIjat, picEna
+                });
+            });
+            return resultList;
+        }
+
+        function renderSummary(records) {
+            const data = generateSummaryData(records);
+            const bodyCost = document.getElementById('summaryBodyCost');
+            const bodyDist = document.getElementById('summaryBodyDist');
+            bodyCost.innerHTML = ''; bodyDist.innerHTML = '';
+
+            data.forEach(d => {
+                bodyCost.innerHTML += `<tr>
+                    <td>${d.monthName}</td>
+                    <td class="col-sum-masuk">${d.totalMasuk.toFixed(2)}</td>
+                    <td class="col-kos">${d.wakAji.toFixed(2)}</td>
+                    <td class="col-kos">${d.selenggara.toFixed(2)}</td>
+                    <td class="col-kos">${d.fixedCost.toFixed(2)}</td>
+                    <td class="col-clean">${d.bersih.toFixed(2)}</td>
+                    <td class="col-pusaka">${d.makHalf.toFixed(2)}</td>
+                    <td class="col-pusaka">${d.pusakaAbah.toFixed(2)}</td>
+                </tr>`;
+
+                bodyDist.innerHTML += `<tr>
+                    <td>${d.monthName}</td>
+                    <td class="col-waris">${d.sMak.toFixed(2)}</td>
+                    <td class="col-waris">${d.sYati.toFixed(2)}</td>
+                    <td class="col-waris">${d.sEla.toFixed(2)}</td>
+                    <td class="col-waris">${d.sIjat.toFixed(2)}</td>
+                    <td class="col-waris">${d.sIna.toFixed(2)}</td>
+                    <td class="col-waris">${d.sPah.toFixed(2)}</td>
+                    <td class="col-waris">${d.sKila.toFixed(2)}</td>
+                    <td class="col-waris">${d.sAyed.toFixed(2)}</td>
+                    <td class="pic-ijat">${d.picIjat.toFixed(2)}</td>
+                    <td class="pic-ena">${d.picEna.toFixed(2)}</td>
+                </tr>`;
+            });
+        }
+
+        // Setup UI Helpers
+        document.getElementById('inputDate').valueAsDate = new Date();
+        window.toggleFeldaInput = function() {
+            const cat = document.getElementById('inputCategory').value;
+            const felda = document.getElementById('inputFeldaDate');
+            felda.disabled = (cat !== 'Hasil Kebun');
+            if(cat !== 'Hasil Kebun') { felda.value = ''; felda.style.backgroundColor = '#eee'; } else { felda.style.backgroundColor = '#fff'; }
+        }
+        window.toggleInput = function(type) {
+            if(type === 'masuk' && document.getElementById('inputMasuk').value > 0) document.getElementById('inputKeluar').value = '';
+            else if (type === 'keluar' && document.getElementById('inputKeluar').value > 0) document.getElementById('inputMasuk').value = '';
+        }
+        window.toggleFeldaInput(); // Init
+
+        // Excel Export
+        window.downloadExcelXML = function() {
+            if(!window.globalRecords) { alert("Tiada data untuk dieksport."); return; }
+            const records = window.globalRecords;
+            const summaryData = window.globalSummaryData || [];
+            let runningBalance = 0;
+            
+            let xml = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="sHeader"><Font ss:Bold="1"/></Style></Styles>';
+            
+            // Sheet 1
+            xml += '<Worksheet ss:Name="Transaksi"><Table><Row>';
+            ['Tarikh', 'Kategori', 'Tarikh Felda', 'Catatan', 'Masuk', 'Keluar', 'Baki'].forEach(h => xml += `<Cell ss:StyleID="sHeader"><Data ss:Type="String">${h}</Data></Cell>`);
+            xml += '</Row>';
+            records.forEach(r => {
+                runningBalance += parseFloat(r.masuk) - parseFloat(r.keluar);
+                xml += `<Row><Cell><Data ss:Type="String">${r.date}</Data></Cell><Cell><Data ss:Type="String">${r.category}</Data></Cell><Cell><Data ss:Type="String">${r.feldaDate||''}</Data></Cell><Cell><Data ss:Type="String">${r.desc}</Data></Cell><Cell><Data ss:Type="Number">${r.masuk}</Data></Cell><Cell><Data ss:Type="Number">${r.keluar}</Data></Cell><Cell><Data ss:Type="Number">${runningBalance}</Data></Cell></Row>`;
+            });
+            xml += '</Table></Worksheet>';
+
+            // Sheet 2
+            xml += '<Worksheet ss:Name="Ringkasan Kos"><Table><Row>';
+            ['Bulan','Jum Masuk','Wak Aji','Selenggara','Kos Tetap','Bersih','Mak (1/2)','Pusaka (1/2)'].forEach(h => xml += `<Cell ss:StyleID="sHeader"><Data ss:Type="String">${h}</Data></Cell>`);
+            xml += '</Row>';
+            summaryData.forEach(d => {
+                xml += `<Row><Cell><Data ss:Type="String">${d.monthName}</Data></Cell><Cell><Data ss:Type="Number">${d.totalMasuk}</Data></Cell><Cell><Data ss:Type="Number">${d.wakAji}</Data></Cell><Cell><Data ss:Type="Number">${d.selenggara}</Data></Cell><Cell><Data ss:Type="Number">${d.fixedCost}</Data></Cell><Cell><Data ss:Type="Number">${d.bersih}</Data></Cell><Cell><Data ss:Type="Number">${d.makHalf}</Data></Cell><Cell><Data ss:Type="Number">${d.pusakaAbah}</Data></Cell></Row>`;
+            });
+            xml += '</Table></Worksheet>';
+
+             // Sheet 3
+            xml += '<Worksheet ss:Name="Agihan Faraid"><Table><Row>';
+            ['Bulan','Mak','Yati','Ela','Ijat','Ina','Pah','Kila','Ayed','PIC IJAT','PIC ENA'].forEach(h => xml += `<Cell ss:StyleID="sHeader"><Data ss:Type="String">${h}</Data></Cell>`);
+            xml += '</Row>';
+            summaryData.forEach(d => {
+                xml += `<Row><Cell><Data ss:Type="String">${d.monthName}</Data></Cell><Cell><Data ss:Type="Number">${d.sMak}</Data></Cell><Cell><Data ss:Type="Number">${d.sYati}</Data></Cell><Cell><Data ss:Type="Number">${d.sEla}</Data></Cell><Cell><Data ss:Type="Number">${d.sIjat}</Data></Cell><Cell><Data ss:Type="Number">${d.sIna}</Data></Cell><Cell><Data ss:Type="Number">${d.sPah}</Data></Cell><Cell><Data ss:Type="Number">${d.sKila}</Data></Cell><Cell><Data ss:Type="Number">${d.sAyed}</Data></Cell><Cell><Data ss:Type="Number">${d.picIjat}</Data></Cell><Cell><Data ss:Type="Number">${d.picEna}</Data></Cell></Row>`;
+            });
+            xml += '</Table></Worksheet></Workbook>';
+
+            let blob = new Blob([xml], {type: "application/vnd.ms-excel"});
+            let link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = "Faraid_Online_Secure.xls";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
