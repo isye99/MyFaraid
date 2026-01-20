@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V2.1)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V2.2)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -54,9 +54,7 @@
         .col-pusaka { background-color: #a9cce3; border-left: 2px solid #333; color: #000; font-weight: bold; } 
         .col-waris { background-color: #f4f6f7; }
         
-        /* Share Fraction Styling */
         .share-fraction { display: block; font-size: 9px; opacity: 0.8; margin-top: 2px; font-weight: normal; }
-
         .pic-ijat { background-color: #d4e6f1; color: #154360; font-weight: bold; border-left: 2px solid #000; } 
         .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000;}
         .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
@@ -69,37 +67,35 @@
         }
         #mainApp { display: none; } 
 
-        /* --- PRINT LOGIC (MODIFIED FOR SIMPLICITY) --- */
+        /* Hidden Area for Custom Slip Print */
+        #customSlipArea { display: none; }
+
+        /* --- PRINT LOGIC --- */
         @media print {
-            .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button { display: none !important; }
-            @page { size: landscape; margin: 10mm; } 
-            body { background-color: white; padding: 0; font-family: 'Times New Roman', serif; zoom: 100%; }
-            .table-wrapper, .summary-wrapper { box-shadow: none; border: none; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
+            .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, h2, h3, .table-wrapper, .summary-wrapper { display: none !important; }
+            @page { size: A4 portrait; margin: 15mm; } 
             
-            /* General Print Table Style */
-            table { width: 100%; font-size: 11px; border-collapse: collapse; } 
-            th, td { border: 1px solid #000 !important; padding: 5px; color: #000 !important; }
-            th { background-color: #eee !important; -webkit-print-color-adjust: exact; } 
-            
-            /* Mode Khas: Cetak Faraid Sahaja (RINGKAS) */
-            body.print-faraid-only * { display: none; }
-            body.print-faraid-only #faraidSection, body.print-faraid-only #faraidSection * { display: block; visibility: visible; }
-            body.print-faraid-only #faraidSection { position: absolute; top: 0; left: 0; width: 100%; }
-            
-            /* Bersihkan style untuk PDF Ringkas */
-            body.print-faraid-only h3 { 
-                display: block; color: black; border-bottom: 2px solid black; 
-                font-size: 16pt; text-align: center; margin-bottom: 20px; padding-bottom: 10px;
-                font-family: Arial, sans-serif;
+            /* Show Custom Slip */
+            body.print-slip-mode #customSlipArea { 
+                display: block !important; 
+                font-family: 'Courier New', Courier, monospace; /* Font ala resit/formal */
+                color: black;
             }
-            body.print-faraid-only table { font-family: Arial, sans-serif; font-size: 10pt; }
-            body.print-faraid-only th { background: white !important; border-bottom: 2px solid black !important; }
-            body.print-faraid-only td { background: white !important; }
-            body.print-faraid-only .btn-faraid-pdf { display: none !important; }
-            body.print-faraid-only .share-fraction { color: #555 !important; font-size: 8pt; }
             
-            /* Highlight Total PIC dengan border tebal sikit untuk print */
-            body.print-faraid-only .pic-ijat, body.print-faraid-only .pic-ena { border-left: 2px solid black !important; font-weight: bold; }
+            .slip-card {
+                border: 1px solid #000;
+                padding: 20px;
+                margin-bottom: 30px;
+                page-break-inside: avoid;
+                width: 100%;
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .slip-header { text-align: center; font-weight: bold; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+            .slip-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+            .slip-total { border-top: 1px solid #000; border-bottom: 2px double #000; margin-top: 5px; padding-top: 5px; padding-bottom: 5px; font-weight: bold; }
+            .slip-group { margin-bottom: 20px; }
         }
     </style>
 </head>
@@ -114,7 +110,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V2.1)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V2.2)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
@@ -158,8 +154,8 @@
 
         <div id="faraidSection">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h3 id="faraidTitle">2. Perincian Agihan Faraid (Slip Agihan)</h3>
-                <button class="btn-faraid-pdf" onclick="printFaraidOnly()">📄 PDF Ringkas (Share)</button>
+                <h3 id="faraidTitle">2. Perincian Agihan Faraid</h3>
+                <button class="btn-faraid-pdf" onclick="printCustomSlip()">📄 Slip Penyata (Format Ringkas)</button>
             </div>
             
             <div class="summary-wrapper">
@@ -185,15 +181,14 @@
                     <tbody id="summaryBodyDist"></tbody>
                 </table>
             </div>
-            <div style="font-size:10px; color:#666; margin-top:5px; text-align:center; font-style:italic;">
-                *Dokumen ini dijana secara automatik oleh Sistem Faraid Keluarga.
-            </div>
         </div>
 
         <div class="summary-box">
             <strong>Status Online:</strong> Log masuk sebagai <span id="userEmailDisplay" style="font-weight:bold; color:blue;"></span>.
         </div>
     </div>
+
+    <div id="customSlipArea"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -217,11 +212,7 @@
         const storage = getStorage(app);
         const tablesCollection = collection(db, "transaksi_faraid");
 
-        const allowedEmails = [
-            "isye99@gmail.com",
-            "sysuhaila@gmail.com"
-        ];
-
+        const allowedEmails = ["isye99@gmail.com", "sysuhaila@gmail.com"];
         let unsubscribeSnapshot = null;
 
         // --- AUTH ---
@@ -319,12 +310,11 @@
             records.forEach((r) => {
                 bal += parseFloat(r.masuk) - parseFloat(r.keluar);
                 let attach = r.fileURL ? `<a href="${r.fileURL}" target="_blank" style="color:blue">Fail</a>` : '-';
-                
                 tbody.innerHTML += `<tr>
                     <td class="col-date">${r.date}</td>
                     <td class="col-cat">${r.category}</td>
                     <td class="col-felda">${r.feldaDate || '-'}</td>
-                    <td class="col-desc">${r.desc} <br><small style="color:#aaa;">${r.createdBy}</small></td>
+                    <td class="col-desc">${r.desc}</td>
                     <td class="col-masuk">${r.masuk>0?r.masuk.toFixed(2):'-'}</td>
                     <td class="col-keluar">${r.keluar>0?r.keluar.toFixed(2):'-'}</td>
                     <td class="col-baki">${bal.toFixed(2)}</td>
@@ -332,9 +322,9 @@
                     <td style="text-align:center"><button onclick="deleteRow('${r.id}')" style="background:red; color:white; font-size:10px;">X</button></td>
                 </tr>`;
             });
-            renderSummary(records);
             window.globalRecords = records; 
-            window.globalSummaryData = generateSummaryData(records); 
+            window.globalSummaryData = generateSummaryData(records);
+            renderSummary(window.globalSummaryData);
         }
 
         function generateSummaryData(records) {
@@ -371,6 +361,7 @@
                 const sKila = (119 / 2304) * pusakaAbah;
                 const sAyed = (238 / 2304) * pusakaAbah;
 
+                // PIC Totals
                 const picIjat = makHalf + sMak + sYati + sEla + sIjat;
                 const picEna = sIna + sPah + sKila + sAyed;
                 
@@ -385,8 +376,7 @@
             return resultList;
         }
 
-        function renderSummary(records) {
-            const data = generateSummaryData(records);
+        function renderSummary(data) {
             const bodyCost = document.getElementById('summaryBodyCost');
             const bodyDist = document.getElementById('summaryBodyDist');
             bodyCost.innerHTML = ''; bodyDist.innerHTML = '';
@@ -419,10 +409,50 @@
             });
         }
 
-        window.printFaraidOnly = function() {
-            document.body.classList.add('print-faraid-only');
+        // --- NEW CUSTOM SLIP PRINT FUNCTION ---
+        window.printCustomSlip = function() {
+            if (!window.globalSummaryData || window.globalSummaryData.length === 0) {
+                alert("Tiada data untuk dicetak."); return;
+            }
+
+            const slipArea = document.getElementById('customSlipArea');
+            slipArea.innerHTML = ''; // Reset
+
+            // Loop setiap bulan dan buat slip
+            window.globalSummaryData.forEach(d => {
+                // Total bagi bahagian Mak (Harta 1/2 + Faraid)
+                const totalMak = d.makHalf + d.sMak;
+
+                let slipHtml = `
+                <div class="slip-card">
+                    <div class="slip-header">
+                        Penyata Bulanan Agihan Faraid Arwah Abah (Hasil Kebun)<br>
+                        Tempoh: ${d.monthName}
+                    </div>
+
+                    <div class="slip-group">
+                        <div class="slip-row"><span>Mak (1/2 + 400/2304) :</span><span>RM ${totalMak.toFixed(2)}</span></div>
+                        <div class="slip-row"><span>Yati (336 / 2304) :</span><span>RM ${d.sYati.toFixed(2)}</span></div>
+                        <div class="slip-row"><span>Ela (336 / 2304) :</span><span>RM ${d.sEla.toFixed(2)}</span></div>
+                        <div class="slip-row"><span>Ijat (672 / 2304) :</span><span>RM ${d.sIjat.toFixed(2)}</span></div>
+                        <div class="slip-row slip-total"><span>Jumlah (Group A):</span><span>RM ${d.picIjat.toFixed(2)}</span></div>
+                    </div>
+
+                    <div class="slip-group">
+                        <div class="slip-row"><span>Ina (84 / 2304) :</span><span>RM ${d.sIna.toFixed(2)}</span></div>
+                        <div class="slip-row"><span>Pah (119 / 2304) :</span><span>RM ${d.sPah.toFixed(2)}</span></div>
+                        <div class="slip-row"><span>Kila (119 / 2304) :</span><span>RM ${d.sKila.toFixed(2)}</span></div>
+                        <div class="slip-row"><span>Ayed (238 / 2304) :</span><span>RM ${d.sAyed.toFixed(2)}</span></div>
+                        <div class="slip-row slip-total"><span>Jumlah (Group B):</span><span>RM ${d.picEna.toFixed(2)}</span></div>
+                    </div>
+                </div>
+                `;
+                slipArea.innerHTML += slipHtml;
+            });
+
+            document.body.classList.add('print-slip-mode');
             window.print();
-            document.body.classList.remove('print-faraid-only');
+            document.body.classList.remove('print-slip-mode');
         }
 
         // Helpers
@@ -442,7 +472,6 @@
         window.downloadExcelXML = function() {
             if(!window.globalRecords) { alert("Tiada data."); return; }
             let xml = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="sHeader"><Font ss:Bold="1"/></Style></Styles>';
-            // Transaksi Sheet
             xml += '<Worksheet ss:Name="Transaksi"><Table><Row>';
             ['Tarikh', 'Kategori', 'Tarikh Felda', 'Catatan', 'Masuk', 'Keluar', 'Baki', 'Link Fail'].forEach(h => xml += `<Cell ss:StyleID="sHeader"><Data ss:Type="String">${h}</Data></Cell>`);
             xml += '</Row>';
@@ -452,16 +481,7 @@
                 xml += `<Row><Cell><Data ss:Type="String">${r.date}</Data></Cell><Cell><Data ss:Type="String">${r.category}</Data></Cell><Cell><Data ss:Type="String">${r.feldaDate||''}</Data></Cell><Cell><Data ss:Type="String">${r.desc}</Data></Cell><Cell><Data ss:Type="Number">${r.masuk}</Data></Cell><Cell><Data ss:Type="Number">${r.keluar}</Data></Cell><Cell><Data ss:Type="Number">${bal}</Data></Cell><Cell><Data ss:Type="String">${r.fileURL||''}</Data></Cell></Row>`;
             });
             xml += '</Table></Worksheet>';
-            
-            // Faraid Sheet
-            xml += '<Worksheet ss:Name="Agihan Faraid"><Table><Row>';
-            ['Bulan','Mak (400)','Yati (336)','Ela (336)','Ijat (672)','Ina (84)','Pah (119)','Kila (119)','Ayed (238)','PIC IJAT','PIC ENA'].forEach(h => xml += `<Cell ss:StyleID="sHeader"><Data ss:Type="String">${h}</Data></Cell>`);
-            xml += '</Row>';
-            window.globalSummaryData.forEach(d => {
-                xml += `<Row><Cell><Data ss:Type="String">${d.monthName}</Data></Cell><Cell><Data ss:Type="Number">${d.sMak}</Data></Cell><Cell><Data ss:Type="Number">${d.sYati}</Data></Cell><Cell><Data ss:Type="Number">${d.sEla}</Data></Cell><Cell><Data ss:Type="Number">${d.sIjat}</Data></Cell><Cell><Data ss:Type="Number">${d.sIna}</Data></Cell><Cell><Data ss:Type="Number">${d.sPah}</Data></Cell><Cell><Data ss:Type="Number">${d.sKila}</Data></Cell><Cell><Data ss:Type="Number">${d.sAyed}</Data></Cell><Cell><Data ss:Type="Number">${d.picIjat}</Data></Cell><Cell><Data ss:Type="Number">${d.picEna}</Data></Cell></Row>`;
-            });
-            xml += '</Table></Worksheet></Workbook>';
-
+            xml += '</Workbook>';
             let blob = new Blob([xml], {type: "application/vnd.ms-excel"});
             let link = document.createElement("a");
             link.href = window.URL.createObjectURL(blob);
