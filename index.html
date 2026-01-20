@@ -2,13 +2,12 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V2.3)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Sistem Kewangan & Faraid Keluarga (V2.5 Mobile)</title>
     
     <style>
-        /* --- STYLE UTAMA --- */
+        /* --- STYLE UTAMA (DESKTOP) --- */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; padding: 20px; }
-        h2 { color: #2c3e50; } 
+        h2 { color: #2c3e50; font-size: 20px; } 
         h3 { color: #2c3e50; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px; font-size: 16px;}
         
         /* Form & Input */
@@ -18,18 +17,18 @@
         input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
         
         /* Buttons */
-        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 5px; transition: 0.2s;}
+        button { padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 5px; transition: 0.2s; font-size: 14px;}
         button:hover { opacity: 0.9; }
         .btn-add { background-color: #27ae60; color: white; } 
         .btn-export { background-color: #2e86c1; color: white; } 
         .btn-pdf { background-color: #8e44ad; color: white; }
         .btn-faraid-pdf { background-color: #d35400; color: white; } 
         .btn-logout { background-color: #c0392b; color: white; float: right; margin-bottom: 20px; }
-        .btn-login { background-color: #4285F4; color: white; font-size: 16px; padding: 15px 30px; }
+        .btn-login { background-color: #4285F4; color: white; font-size: 16px; padding: 15px 30px; width: 100%; }
 
         /* Tables */
         .table-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
-        table { width: 100%; border-collapse: collapse; font-size: 13px; } 
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; /* Paksa table lebar supaya boleh scroll */ } 
         th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
         th { background-color: #2c3e50; color: white; text-align: center; white-space: nowrap; position: sticky; top: 0; }
         tr:nth-child(even) { background-color: #f9f9f9; } 
@@ -47,7 +46,7 @@
 
         /* Summary Tables */
         .summary-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 5px; margin-bottom: 20px; }
-        .summary-table { width: 100%; } 
+        .summary-table { width: 100%; min-width: 1000px; } 
         .summary-table th { background-color: #34495e; color: white; padding: 8px; border: 1px solid #555;}
         .col-sum-masuk { background-color: #d5f5e3; font-weight: bold; color: #196f3d; } 
         .col-kos { background-color: #eaecee; color: #555; } 
@@ -59,44 +58,83 @@
         .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000;}
         .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
 
+        /* Faraid Controls (Bar Butang Slip) */
+        #faraidControls {
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom:10px; background: #e8f6f3; padding: 10px; border-radius: 5px; border: 1px solid #d1f2eb;
+        }
+        .slip-control-group { display: flex; gap: 5px; align-items: center; }
+
         /* --- LOGIN PAGE STYLES --- */
         #loginContainer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #ecf0f1; display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 1000;
+            padding: 20px;
         }
         #mainApp { display: none; } 
 
         /* Hidden Area for Custom Slip Print */
         #customSlipArea { display: none; }
 
+
+        /* =========================================
+           MOBILE RESPONSIVE STYLES (ANDROID/IPHONE)
+           ========================================= */
+        @media screen and (max-width: 768px) {
+            body { padding: 10px; }
+            h2 { font-size: 18px; text-align: center; }
+
+            /* Susun Input Menjadi Menegak */
+            .input-container { flex-direction: column; align-items: stretch; gap: 15px; }
+            .form-group { width: 100%; }
+            .form-group input, .form-group select { width: 100% !important; box-sizing: border-box; } /* Paksa penuh */
+            
+            /* Besarkan Butang untuk Jari */
+            .btn-add, .btn-export, .btn-pdf { width: 100%; margin: 5px 0; padding: 15px; font-size: 16px; }
+
+            /* Baiki Bar Kawalan Slip Faraid */
+            #faraidControls { flex-direction: column; align-items: stretch; gap: 10px; text-align: center; }
+            #faraidControls h3 { margin-bottom: 5px; }
+            .slip-control-group { flex-direction: column; width: 100%; }
+            #slipMonthInput { width: 100%; padding: 10px; box-sizing: border-box; margin-bottom: 5px; }
+            .btn-faraid-pdf { width: 100%; padding: 15px; font-size: 16px; }
+        }
+
+
         /* --- PRINT LOGIC --- */
         @media print {
-            .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, h2, h3, .table-wrapper, .summary-wrapper, #faraidControls { display: none !important; }
-            @page { size: A4 portrait; margin: 15mm; } 
+            .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, #faraidControls { display: none !important; }
+            @page { size: landscape; margin: 10mm; } 
             
-            /* Show Custom Slip */
+            /* Reset zoom untuk print */
+            body { zoom: 100%; padding: 0; background: white; }
+            
+            /* Table Print Style */
+            .table-wrapper, .summary-wrapper { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
+            table { min-width: auto; width: 100%; font-size: 11pt; }
+            
+            /* --- MOD SLIP KHAS --- */
+            body.print-slip-mode #mainApp { display: none !important; }
             body.print-slip-mode #customSlipArea { 
                 display: block !important; 
                 font-family: 'Courier New', Courier, monospace; 
                 color: black;
+                position: absolute; top: 0; left: 0; width: 100%;
             }
             
             .slip-card {
                 border: 2px solid #000;
-                padding: 30px;
-                margin-top: 50px;
-                page-break-inside: avoid;
-                width: 100%;
-                max-width: 700px;
-                margin-left: auto;
-                margin-right: auto;
-                background: white;
+                padding: 20px;
+                margin-top: 20px;
+                width: 90%;
+                margin-left: auto; margin-right: auto;
             }
             .slip-header { text-align: center; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; font-size: 14pt; }
             .slip-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12pt; border-bottom: 1px dotted #ccc; }
-            .slip-total { border-top: 2px solid #000; border-bottom: 4px double #000; margin-top: 10px; padding-top: 5px; padding-bottom: 5px; font-weight: bold; font-size: 13pt; background: #eee; -webkit-print-color-adjust: exact;}
-            .slip-group { margin-bottom: 30px; }
+            .slip-total { border-top: 2px solid #000; border-bottom: 4px double #000; margin-top: 10px; padding-top: 5px; font-weight: bold; font-size: 13pt; background: #eee; -webkit-print-color-adjust: exact;}
+            
+            @page { size: auto; margin: 5mm; } 
         }
     </style>
 </head>
@@ -104,28 +142,28 @@
 
     <div id="loginContainer">
         <h2 style="margin-bottom: 20px;">Sistem Faraid Keluarga</h2>
-        <p style="margin-bottom: 30px; color: #666;">Sila login menggunakan Google untuk akses.</p>
-        <button class="btn-login" onclick="window.loginGoogle()">🔐 Login dengan Google</button>
-        <p id="loginMsg" style="color: red; margin-top: 15px;"></p>
+        <p style="margin-bottom: 30px; color: #666; text-align: center;">Sila login menggunakan Google.<br>Pastikan internet laju.</p>
+        <button class="btn-login" onclick="window.loginGoogle()">🔐 Login Google</button>
+        <p id="loginMsg" style="color: red; margin-top: 15px; text-align: center;"></p>
     </div>
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V2.3)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V2.5)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
             <div class="form-group"><label>Kategori</label><select id="inputCategory" onchange="toggleFeldaInput()"><option value="Hasil Kebun">Hasil Kebun</option><option value="Lain-lain">Lain-lain</option></select></div>
             <div class="form-group"><label>Tarikh Resit Felda</label><input type="date" id="inputFeldaDate"></div>
-            <div class="form-group"><label>Catatan</label><input type="text" id="inputDesc" placeholder="Contoh: Jualan Durian" style="width: 200px;"></div>
-            <div class="form-group"><label>Lampiran (PDF/Gambar)</label><input type="file" id="inputFile" accept="image/*,application/pdf" style="width: 180px;"></div>
+            <div class="form-group"><label>Catatan</label><input type="text" id="inputDesc" placeholder="Contoh: Jualan Durian"></div>
+            <div class="form-group"><label>Lampiran</label><input type="file" id="inputFile" accept="image/*,application/pdf"></div>
             
-            <div class="form-group"><label>MASUK (RM)</label><input type="number" id="inputMasuk" placeholder="0.00" oninput="toggleInput('masuk')" style="width: 100px;"></div>
-            <div class="form-group"><label>KELUAR (RM)</label><input type="number" id="inputKeluar" placeholder="0.00" oninput="toggleInput('keluar')" style="width: 100px;"></div>
+            <div class="form-group"><label>MASUK (RM)</label><input type="number" id="inputMasuk" placeholder="0.00" oninput="toggleInput('masuk')"></div>
+            <div class="form-group"><label>KELUAR (RM)</label><input type="number" id="inputKeluar" placeholder="0.00" oninput="toggleInput('keluar')"></div>
             
-            <button class="btn-add" onclick="window.addData()">+ Tambah</button>
-            <button class="btn-export" onclick="downloadExcelXML()">Excel</button>
-            <button class="btn-pdf" onclick="window.print()">🖨️ Semua</button>
+            <button class="btn-add" onclick="window.addData()">+ Tambah Data</button>
+            <button class="btn-export" onclick="downloadExcelXML()">Download Excel</button>
+            <button class="btn-pdf" onclick="window.print()">🖨️ Cetak Semua Rekod</button>
         </div>
 
         <div class="table-wrapper">
@@ -133,7 +171,7 @@
                 <thead>
                     <tr>
                         <th class="col-date">Tarikh</th><th class="col-cat">Kategori</th><th class="col-felda">Tarikh Resit<br>Felda</th><th class="col-desc">Catatan</th>
-                        <th class="col-masuk">Masuk (RM)</th><th class="col-keluar">Keluar (RM)</th><th class="col-baki">Baki (RM)</th>
+                        <th class="col-masuk">Masuk</th><th class="col-keluar">Keluar</th><th class="col-baki">Baki</th>
                         <th class="col-attach">Lampiran</th>
                         <th>Action</th>
                     </tr>
@@ -142,7 +180,7 @@
             </table>
         </div>
 
-        <h3>1. Ringkasan Kos (Berdasarkan Tarikh Transaksi)</h3>
+        <h3>1. Ringkasan Kos</h3>
         <div class="summary-wrapper">
             <table class="summary-table">
                 <thead>
@@ -154,12 +192,12 @@
         </div>
 
         <div id="faraidSection">
-            <div id="faraidControls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background: #e8f6f3; padding: 10px; border-radius: 5px; border: 1px solid #d1f2eb;">
-                <h3 style="margin:0; border:none; padding:0;">2. Perincian Agihan Faraid</h3>
-                <div style="display:flex; gap: 5px; align-items: center;">
+            <div id="faraidControls">
+                <h3 style="margin:0; border:none; padding:0; font-size:16px;">2. Slip Agihan Faraid</h3>
+                <div class="slip-control-group">
                     <label style="margin:0;">Pilih Bulan:</label>
-                    <input type="month" id="slipMonthInput" style="padding: 5px;">
-                    <button class="btn-faraid-pdf" onclick="printCustomSlip()">📄 Cetak Slip (Pilih Bulan)</button>
+                    <input type="month" id="slipMonthInput">
+                    <button class="btn-faraid-pdf" onclick="printCustomSlip()">📄 Cetak Slip</button>
                 </div>
             </div>
             
@@ -173,14 +211,14 @@
                             <th rowspan="2" class="pic-ena">PIC ENA<br><span style="font-weight:normal; font-size:9px">(Group B)</span></th>
                         </tr>
                         <tr>
-                            <th class="col-waris">Mak<span class="share-fraction">400 / 2304</span></th>
-                            <th class="col-waris">Yati<span class="share-fraction">336 / 2304</span></th>
-                            <th class="col-waris">Ela<span class="share-fraction">336 / 2304</span></th>
-                            <th class="col-waris">Ijat<span class="share-fraction">672 / 2304</span></th>
-                            <th class="col-waris">Ina<span class="share-fraction">84 / 2304</span></th>
-                            <th class="col-waris">Pah<span class="share-fraction">119 / 2304</span></th>
-                            <th class="col-waris">Kila<span class="share-fraction">119 / 2304</span></th>
-                            <th class="col-waris">Ayed<span class="share-fraction">238 / 2304</span></th>
+                            <th class="col-waris">Mak<span class="share-fraction">400</span></th>
+                            <th class="col-waris">Yati<span class="share-fraction">336</span></th>
+                            <th class="col-waris">Ela<span class="share-fraction">336</span></th>
+                            <th class="col-waris">Ijat<span class="share-fraction">672</span></th>
+                            <th class="col-waris">Ina<span class="share-fraction">84</span></th>
+                            <th class="col-waris">Pah<span class="share-fraction">119</span></th>
+                            <th class="col-waris">Kila<span class="share-fraction">119</span></th>
+                            <th class="col-waris">Ayed<span class="share-fraction">238</span></th>
                         </tr>
                     </thead>
                     <tbody id="summaryBodyDist"></tbody>
@@ -189,7 +227,7 @@
         </div>
 
         <div class="summary-box">
-            <strong>Status Online:</strong> Log masuk sebagai <span id="userEmailDisplay" style="font-weight:bold; color:blue;"></span>.
+            <strong>Status:</strong> Log masuk sebagai <span id="userEmailDisplay" style="font-weight:bold; color:blue;"></span>.
         </div>
     </div>
 
@@ -373,7 +411,7 @@
                 try { monthName = new Date(monthKey + "-01").toLocaleDateString('ms-MY', { year: 'numeric', month: 'long' }); } catch(e) {}
 
                 resultList.push({
-                    monthKey, // Added for filtering
+                    monthKey,
                     monthName, totalMasuk, wakAji, selenggara, fixedCost, bersih, makHalf, pusakaAbah,
                     sMak, sYati, sEla, sIjat, sIna, sPah, sKila, sAyed, picIjat, picEna
                 });
@@ -414,29 +452,25 @@
             });
         }
 
-        // --- NEW LOGIC: PRINT SPECIFIC MONTH ---
         window.printCustomSlip = function() {
-            // 1. Dapatkan Bulan dari Input
-            const selectedMonth = document.getElementById('slipMonthInput').value; // Format: YYYY-MM
+            const selectedMonth = document.getElementById('slipMonthInput').value; 
             if (!selectedMonth) { 
-                alert("Sila pilih bulan terlebih dahulu di kotak sebelah butang cetak."); 
+                alert("Sila pilih bulan dahulu."); 
                 document.getElementById('slipMonthInput').focus();
                 return; 
             }
 
-            // 2. Cari Data untuk Bulan Tersebut
             if (!window.globalSummaryData || window.globalSummaryData.length === 0) {
-                alert("Tiada data tersedia."); return;
+                alert("Tiada data."); return;
             }
 
             const d = window.globalSummaryData.find(item => item.monthKey === selectedMonth);
 
             if (!d) {
-                alert("Tiada rekod agihan untuk bulan yang dipilih: " + selectedMonth);
+                alert("Tiada rekod untuk bulan: " + selectedMonth);
                 return;
             }
 
-            // 3. Generate HTML untuk Satu Bulan Itu Sahaja
             const slipArea = document.getElementById('customSlipArea');
             slipArea.innerHTML = ''; 
 
@@ -479,7 +513,6 @@
 
         // Helpers
         document.getElementById('inputDate').valueAsDate = new Date();
-        // Set default month picker to current month
         const now = new Date();
         const yyyy = now.getFullYear();
         const mm = String(now.getMonth() + 1).padStart(2, '0');
