@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V2.2)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V2.3)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -23,7 +23,7 @@
         .btn-add { background-color: #27ae60; color: white; } 
         .btn-export { background-color: #2e86c1; color: white; } 
         .btn-pdf { background-color: #8e44ad; color: white; }
-        .btn-faraid-pdf { background-color: #d35400; color: white; margin-left: 5px; } 
+        .btn-faraid-pdf { background-color: #d35400; color: white; } 
         .btn-logout { background-color: #c0392b; color: white; float: right; margin-bottom: 20px; }
         .btn-login { background-color: #4285F4; color: white; font-size: 16px; padding: 15px 30px; }
 
@@ -72,30 +72,31 @@
 
         /* --- PRINT LOGIC --- */
         @media print {
-            .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, h2, h3, .table-wrapper, .summary-wrapper { display: none !important; }
+            .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, h2, h3, .table-wrapper, .summary-wrapper, #faraidControls { display: none !important; }
             @page { size: A4 portrait; margin: 15mm; } 
             
             /* Show Custom Slip */
             body.print-slip-mode #customSlipArea { 
                 display: block !important; 
-                font-family: 'Courier New', Courier, monospace; /* Font ala resit/formal */
+                font-family: 'Courier New', Courier, monospace; 
                 color: black;
             }
             
             .slip-card {
-                border: 1px solid #000;
-                padding: 20px;
-                margin-bottom: 30px;
+                border: 2px solid #000;
+                padding: 30px;
+                margin-top: 50px;
                 page-break-inside: avoid;
                 width: 100%;
-                max-width: 600px;
+                max-width: 700px;
                 margin-left: auto;
                 margin-right: auto;
+                background: white;
             }
-            .slip-header { text-align: center; font-weight: bold; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-            .slip-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-            .slip-total { border-top: 1px solid #000; border-bottom: 2px double #000; margin-top: 5px; padding-top: 5px; padding-bottom: 5px; font-weight: bold; }
-            .slip-group { margin-bottom: 20px; }
+            .slip-header { text-align: center; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; font-size: 14pt; }
+            .slip-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12pt; border-bottom: 1px dotted #ccc; }
+            .slip-total { border-top: 2px solid #000; border-bottom: 4px double #000; margin-top: 10px; padding-top: 5px; padding-bottom: 5px; font-weight: bold; font-size: 13pt; background: #eee; -webkit-print-color-adjust: exact;}
+            .slip-group { margin-bottom: 30px; }
         }
     </style>
 </head>
@@ -110,7 +111,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V2.2)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V2.3)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
@@ -153,9 +154,13 @@
         </div>
 
         <div id="faraidSection">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h3 id="faraidTitle">2. Perincian Agihan Faraid</h3>
-                <button class="btn-faraid-pdf" onclick="printCustomSlip()">📄 Slip Penyata (Format Ringkas)</button>
+            <div id="faraidControls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background: #e8f6f3; padding: 10px; border-radius: 5px; border: 1px solid #d1f2eb;">
+                <h3 style="margin:0; border:none; padding:0;">2. Perincian Agihan Faraid</h3>
+                <div style="display:flex; gap: 5px; align-items: center;">
+                    <label style="margin:0;">Pilih Bulan:</label>
+                    <input type="month" id="slipMonthInput" style="padding: 5px;">
+                    <button class="btn-faraid-pdf" onclick="printCustomSlip()">📄 Cetak Slip (Pilih Bulan)</button>
+                </div>
             </div>
             
             <div class="summary-wrapper">
@@ -361,7 +366,6 @@
                 const sKila = (119 / 2304) * pusakaAbah;
                 const sAyed = (238 / 2304) * pusakaAbah;
 
-                // PIC Totals
                 const picIjat = makHalf + sMak + sYati + sEla + sIjat;
                 const picEna = sIna + sPah + sKila + sAyed;
                 
@@ -369,6 +373,7 @@
                 try { monthName = new Date(monthKey + "-01").toLocaleDateString('ms-MY', { year: 'numeric', month: 'long' }); } catch(e) {}
 
                 resultList.push({
+                    monthKey, // Added for filtering
                     monthName, totalMasuk, wakAji, selenggara, fixedCost, bersih, makHalf, pusakaAbah,
                     sMak, sYati, sEla, sIjat, sIna, sPah, sKila, sAyed, picIjat, picEna
                 });
@@ -409,46 +414,63 @@
             });
         }
 
-        // --- NEW CUSTOM SLIP PRINT FUNCTION ---
+        // --- NEW LOGIC: PRINT SPECIFIC MONTH ---
         window.printCustomSlip = function() {
-            if (!window.globalSummaryData || window.globalSummaryData.length === 0) {
-                alert("Tiada data untuk dicetak."); return;
+            // 1. Dapatkan Bulan dari Input
+            const selectedMonth = document.getElementById('slipMonthInput').value; // Format: YYYY-MM
+            if (!selectedMonth) { 
+                alert("Sila pilih bulan terlebih dahulu di kotak sebelah butang cetak."); 
+                document.getElementById('slipMonthInput').focus();
+                return; 
             }
 
+            // 2. Cari Data untuk Bulan Tersebut
+            if (!window.globalSummaryData || window.globalSummaryData.length === 0) {
+                alert("Tiada data tersedia."); return;
+            }
+
+            const d = window.globalSummaryData.find(item => item.monthKey === selectedMonth);
+
+            if (!d) {
+                alert("Tiada rekod agihan untuk bulan yang dipilih: " + selectedMonth);
+                return;
+            }
+
+            // 3. Generate HTML untuk Satu Bulan Itu Sahaja
             const slipArea = document.getElementById('customSlipArea');
-            slipArea.innerHTML = ''; // Reset
+            slipArea.innerHTML = ''; 
 
-            // Loop setiap bulan dan buat slip
-            window.globalSummaryData.forEach(d => {
-                // Total bagi bahagian Mak (Harta 1/2 + Faraid)
-                const totalMak = d.makHalf + d.sMak;
+            const totalMak = d.makHalf + d.sMak;
 
-                let slipHtml = `
-                <div class="slip-card">
-                    <div class="slip-header">
-                        Penyata Bulanan Agihan Faraid Arwah Abah (Hasil Kebun)<br>
-                        Tempoh: ${d.monthName}
-                    </div>
-
-                    <div class="slip-group">
-                        <div class="slip-row"><span>Mak (1/2 + 400/2304) :</span><span>RM ${totalMak.toFixed(2)}</span></div>
-                        <div class="slip-row"><span>Yati (336 / 2304) :</span><span>RM ${d.sYati.toFixed(2)}</span></div>
-                        <div class="slip-row"><span>Ela (336 / 2304) :</span><span>RM ${d.sEla.toFixed(2)}</span></div>
-                        <div class="slip-row"><span>Ijat (672 / 2304) :</span><span>RM ${d.sIjat.toFixed(2)}</span></div>
-                        <div class="slip-row slip-total"><span>Jumlah (Group A):</span><span>RM ${d.picIjat.toFixed(2)}</span></div>
-                    </div>
-
-                    <div class="slip-group">
-                        <div class="slip-row"><span>Ina (84 / 2304) :</span><span>RM ${d.sIna.toFixed(2)}</span></div>
-                        <div class="slip-row"><span>Pah (119 / 2304) :</span><span>RM ${d.sPah.toFixed(2)}</span></div>
-                        <div class="slip-row"><span>Kila (119 / 2304) :</span><span>RM ${d.sKila.toFixed(2)}</span></div>
-                        <div class="slip-row"><span>Ayed (238 / 2304) :</span><span>RM ${d.sAyed.toFixed(2)}</span></div>
-                        <div class="slip-row slip-total"><span>Jumlah (Group B):</span><span>RM ${d.picEna.toFixed(2)}</span></div>
-                    </div>
+            let slipHtml = `
+            <div class="slip-card">
+                <div class="slip-header">
+                    Penyata Bulanan Agihan Faraid Arwah Abah (Hasil Kebun)<br>
+                    Tempoh: ${d.monthName}
                 </div>
-                `;
-                slipArea.innerHTML += slipHtml;
-            });
+
+                <div class="slip-group">
+                    <div class="slip-row"><span>Mak (1/2 + 400/2304) :</span><span>RM ${totalMak.toFixed(2)}</span></div>
+                    <div class="slip-row"><span>Yati (336 / 2304) :</span><span>RM ${d.sYati.toFixed(2)}</span></div>
+                    <div class="slip-row"><span>Ela (336 / 2304) :</span><span>RM ${d.sEla.toFixed(2)}</span></div>
+                    <div class="slip-row"><span>Ijat (672 / 2304) :</span><span>RM ${d.sIjat.toFixed(2)}</span></div>
+                    <div class="slip-row slip-total"><span>Jumlah (Group A):</span><span>RM ${d.picIjat.toFixed(2)}</span></div>
+                </div>
+
+                <div class="slip-group">
+                    <div class="slip-row"><span>Ina (84 / 2304) :</span><span>RM ${d.sIna.toFixed(2)}</span></div>
+                    <div class="slip-row"><span>Pah (119 / 2304) :</span><span>RM ${d.sPah.toFixed(2)}</span></div>
+                    <div class="slip-row"><span>Kila (119 / 2304) :</span><span>RM ${d.sKila.toFixed(2)}</span></div>
+                    <div class="slip-row"><span>Ayed (238 / 2304) :</span><span>RM ${d.sAyed.toFixed(2)}</span></div>
+                    <div class="slip-row slip-total"><span>Jumlah (Group B):</span><span>RM ${d.picEna.toFixed(2)}</span></div>
+                </div>
+                
+                <div style="margin-top:20px; text-align:center; font-size:10px; color:#555;">
+                    *Dicetak pada: ${new Date().toLocaleString()}
+                </div>
+            </div>
+            `;
+            slipArea.innerHTML = slipHtml;
 
             document.body.classList.add('print-slip-mode');
             window.print();
@@ -457,6 +479,12 @@
 
         // Helpers
         document.getElementById('inputDate').valueAsDate = new Date();
+        // Set default month picker to current month
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        document.getElementById('slipMonthInput').value = `${yyyy}-${mm}`;
+
         window.toggleFeldaInput = function() {
             const cat = document.getElementById('inputCategory').value;
             const felda = document.getElementById('inputFeldaDate');
