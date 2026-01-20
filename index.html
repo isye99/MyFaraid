@@ -2,7 +2,8 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Sistem Kewangan & Faraid Keluarga (V2.5 Mobile)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Kewangan & Faraid Keluarga (V2.6 Mobile Fix)</title>
     
     <style>
         /* --- STYLE UTAMA (DESKTOP) --- */
@@ -28,7 +29,7 @@
 
         /* Tables */
         .table-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; /* Paksa table lebar supaya boleh scroll */ } 
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; } 
         th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
         th { background-color: #2c3e50; color: white; text-align: center; white-space: nowrap; position: sticky; top: 0; }
         tr:nth-child(even) { background-color: #f9f9f9; } 
@@ -58,14 +59,14 @@
         .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000;}
         .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
 
-        /* Faraid Controls (Bar Butang Slip) */
+        /* Faraid Controls */
         #faraidControls {
             display: flex; justify-content: space-between; align-items: center; 
             margin-bottom:10px; background: #e8f6f3; padding: 10px; border-radius: 5px; border: 1px solid #d1f2eb;
         }
         .slip-control-group { display: flex; gap: 5px; align-items: center; }
 
-        /* --- LOGIN PAGE STYLES --- */
+        /* Login Screen */
         #loginContainer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #ecf0f1; display: flex; flex-direction: column;
@@ -77,23 +78,14 @@
         /* Hidden Area for Custom Slip Print */
         #customSlipArea { display: none; }
 
-
-        /* =========================================
-           MOBILE RESPONSIVE STYLES (ANDROID/IPHONE)
-           ========================================= */
+        /* MOBILE RESPONSIVE */
         @media screen and (max-width: 768px) {
             body { padding: 10px; }
             h2 { font-size: 18px; text-align: center; }
-
-            /* Susun Input Menjadi Menegak */
             .input-container { flex-direction: column; align-items: stretch; gap: 15px; }
             .form-group { width: 100%; }
-            .form-group input, .form-group select { width: 100% !important; box-sizing: border-box; } /* Paksa penuh */
-            
-            /* Besarkan Butang untuk Jari */
+            .form-group input, .form-group select { width: 100% !important; box-sizing: border-box; }
             .btn-add, .btn-export, .btn-pdf { width: 100%; margin: 5px 0; padding: 15px; font-size: 16px; }
-
-            /* Baiki Bar Kawalan Slip Faraid */
             #faraidControls { flex-direction: column; align-items: stretch; gap: 10px; text-align: center; }
             #faraidControls h3 { margin-bottom: 5px; }
             .slip-control-group { flex-direction: column; width: 100%; }
@@ -101,26 +93,31 @@
             .btn-faraid-pdf { width: 100%; padding: 15px; font-size: 16px; }
         }
 
-
-        /* --- PRINT LOGIC --- */
+        /* --- PRINT LOGIC (FIXED FOR MOBILE) --- */
         @media print {
             .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, #faraidControls { display: none !important; }
             @page { size: landscape; margin: 10mm; } 
             
-            /* Reset zoom untuk print */
             body { zoom: 100%; padding: 0; background: white; }
-            
-            /* Table Print Style */
             .table-wrapper, .summary-wrapper { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
             table { min-width: auto; width: 100%; font-size: 11pt; }
             
             /* --- MOD SLIP KHAS --- */
+            /* Jika dalam mode slip, sorok app utama sepenuhnya */
             body.print-slip-mode #mainApp { display: none !important; }
+            
+            /* Tunjuk Slip Area dan paksa background putih (penting untuk mobile) */
             body.print-slip-mode #customSlipArea { 
                 display: block !important; 
                 font-family: 'Courier New', Courier, monospace; 
                 color: black;
-                position: absolute; top: 0; left: 0; width: 100%;
+                position: absolute; 
+                top: 0; 
+                left: 0; 
+                width: 100%;
+                height: 100%;
+                background: white; 
+                z-index: 9999;
             }
             
             .slip-card {
@@ -128,7 +125,9 @@
                 padding: 20px;
                 margin-top: 20px;
                 width: 90%;
+                max-width: 700px;
                 margin-left: auto; margin-right: auto;
+                background: white;
             }
             .slip-header { text-align: center; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; font-size: 14pt; }
             .slip-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12pt; border-bottom: 1px dotted #ccc; }
@@ -149,7 +148,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V2.5)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V2.6)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
@@ -239,7 +238,7 @@
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-        // --- TEPEK CONFIG FIREBASE DI SINI ---
+        // --- TEPEK CONFIG FIREBASE ANDA DI SINI ---
         const firebaseConfig = {
             apiKey: "AIzaSyAaGpKuDs8d3-n5ulueMUInoZhxSRkQXWY",
             authDomain: "myfaraid.firebaseapp.com",
@@ -255,6 +254,7 @@
         const storage = getStorage(app);
         const tablesCollection = collection(db, "transaksi_faraid");
 
+        // --- MASUKKAN EMAIL FAMILY DI SINI ---
         const allowedEmails = ["isye99@gmail.com", "sysuhaila@gmail.com"];
         let unsubscribeSnapshot = null;
 
@@ -452,7 +452,9 @@
             });
         }
 
+        // --- NEW LOGIC: PRINT SPECIFIC MONTH (MOBILE FIX) ---
         window.printCustomSlip = function() {
+            // 1. Dapatkan Bulan
             const selectedMonth = document.getElementById('slipMonthInput').value; 
             if (!selectedMonth) { 
                 alert("Sila pilih bulan dahulu."); 
@@ -460,6 +462,7 @@
                 return; 
             }
 
+            // 2. Cari Data
             if (!window.globalSummaryData || window.globalSummaryData.length === 0) {
                 alert("Tiada data."); return;
             }
@@ -471,6 +474,7 @@
                 return;
             }
 
+            // 3. Generate HTML
             const slipArea = document.getElementById('customSlipArea');
             slipArea.innerHTML = ''; 
 
@@ -506,9 +510,20 @@
             `;
             slipArea.innerHTML = slipHtml;
 
+            // --- FIX UNTUK PHONE (ANDROID/iOS) ---
+            // Tambah class untuk ubah paparan
             document.body.classList.add('print-slip-mode');
-            window.print();
-            document.body.classList.remove('print-slip-mode');
+
+            // Tunggu 500ms (setengah saat) bagi browser render, baru print
+            setTimeout(function() {
+                window.print();
+                
+                // Selepas print dialog keluar/tutup, tunggu 1 saat baru balik ke asal
+                setTimeout(function() {
+                    document.body.classList.remove('print-slip-mode');
+                }, 1000);
+                
+            }, 500);
         }
 
         // Helpers
