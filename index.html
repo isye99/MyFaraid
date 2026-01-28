@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V2.6 Mobile Fix)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V2.7 - Key In Kos)</title>
     
     <style>
-        /* --- STYLE UTAMA (DESKTOP) --- */
+        /* --- STYLE UTAMA --- */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; padding: 20px; }
         h2 { color: #2c3e50; font-size: 20px; } 
         h3 { color: #2c3e50; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px; font-size: 16px;}
         
-        /* Form & Input */
+        /* Input & Forms */
         .input-container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
         .form-group { display: flex; flex-direction: column; } 
         label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
@@ -34,100 +34,73 @@
         th { background-color: #2c3e50; color: white; text-align: center; white-space: nowrap; position: sticky; top: 0; }
         tr:nth-child(even) { background-color: #f9f9f9; } 
         
-        /* Column Specific Colors */
-        .col-date { text-align: center; background-color: #ecf0f1; width: 100px; color: #000; font-weight: bold;} 
-        .col-cat { text-align: center; background-color: #eaf2f8; width: 120px; font-weight: bold; color: #2471a3;}
-        .col-felda { text-align: center; background-color: #d6eaf8; width: 120px; color: #154360;}
-        .col-desc { text-align: left; background-color: #ecf0f1; width: 250px; color: #000; font-weight: bold;} 
+        /* Colors */
+        .col-date { text-align: center; background-color: #ecf0f1; width: 100px; font-weight: bold;} 
+        .col-cat { text-align: center; background-color: #eaf2f8; color: #2471a3;}
         .col-masuk { background-color: #e8f8f5; font-weight: bold; color: green; } 
         .col-keluar { background-color: #fdedec; font-weight: bold; color: red; } 
         .col-baki { background-color: #fff3cd; font-weight: bold; color: #000;} 
         .col-clean { background-color: #eafaf1; font-weight: bold; color: #0099ff; }
-        .col-attach { text-align: center; width: 80px; } 
-
-        /* Summary Tables */
-        .summary-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 5px; margin-bottom: 20px; }
-        .summary-table { width: 100%; min-width: 1000px; } 
-        .summary-table th { background-color: #34495e; color: white; padding: 8px; border: 1px solid #555;}
+        
+        /* Summary Table Specifics */
         .col-sum-masuk { background-color: #d5f5e3; font-weight: bold; color: #196f3d; } 
-        .col-kos { background-color: #eaecee; color: #555; } 
-        .col-pusaka { background-color: #a9cce3; border-left: 2px solid #333; color: #000; font-weight: bold; } 
+        .col-kos { background-color: #eaecee; color: #555; width: 100px; } 
+        .col-pusaka { background-color: #a9cce3; border-left: 2px solid #333; font-weight: bold; } 
         .col-waris { background-color: #f4f6f7; }
+
+        /* Input Key-In Dalam Table */
+        .input-kos { 
+            width: 80px; text-align: right; border: 1px solid #ccc; 
+            padding: 5px; border-radius: 3px; font-weight: bold; color: #c0392b;
+        }
+        .input-kos:focus { border-color: #2980b9; outline: none; background: #eaf2f8; }
         
         .share-fraction { display: block; font-size: 9px; opacity: 0.8; margin-top: 2px; font-weight: normal; }
         .pic-ijat { background-color: #d4e6f1; color: #154360; font-weight: bold; border-left: 2px solid #000; } 
-        .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000;}
+        .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000; }
         .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
 
-        /* Faraid Controls */
-        #faraidControls {
-            display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom:10px; background: #e8f6f3; padding: 10px; border-radius: 5px; border: 1px solid #d1f2eb;
+        /* Mobile Responsive */
+        @media screen and (max-width: 768px) {
+            body { padding: 10px; }
+            .input-container { flex-direction: column; align-items: stretch; gap: 15px; }
+            .form-group input, .form-group select { width: 100% !important; box-sizing: border-box; }
+            .btn-add, .btn-export, .btn-pdf, .btn-faraid-pdf { width: 100%; padding: 15px; font-size: 16px; margin: 5px 0; }
+            #faraidControls { flex-direction: column; gap: 10px; }
         }
-        .slip-control-group { display: flex; gap: 5px; align-items: center; }
 
         /* Login Screen */
         #loginContainer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #ecf0f1; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 1000;
-            padding: 20px;
+            justify-content: center; align-items: center; z-index: 1000; padding: 20px;
         }
         #mainApp { display: none; } 
-
-        /* Hidden Area for Custom Slip Print */
         #customSlipArea { display: none; }
 
-        /* MOBILE RESPONSIVE */
-        @media screen and (max-width: 768px) {
-            body { padding: 10px; }
-            h2 { font-size: 18px; text-align: center; }
-            .input-container { flex-direction: column; align-items: stretch; gap: 15px; }
-            .form-group { width: 100%; }
-            .form-group input, .form-group select { width: 100% !important; box-sizing: border-box; }
-            .btn-add, .btn-export, .btn-pdf { width: 100%; margin: 5px 0; padding: 15px; font-size: 16px; }
-            #faraidControls { flex-direction: column; align-items: stretch; gap: 10px; text-align: center; }
-            #faraidControls h3 { margin-bottom: 5px; }
-            .slip-control-group { flex-direction: column; width: 100%; }
-            #slipMonthInput { width: 100%; padding: 10px; box-sizing: border-box; margin-bottom: 5px; }
-            .btn-faraid-pdf { width: 100%; padding: 15px; font-size: 16px; }
-        }
-
-        /* --- PRINT LOGIC (FIXED FOR MOBILE) --- */
+        /* PRINT LOGIC */
         @media print {
             .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, #faraidControls { display: none !important; }
             @page { size: landscape; margin: 10mm; } 
-            
             body { zoom: 100%; padding: 0; background: white; }
             .table-wrapper, .summary-wrapper { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
             table { min-width: auto; width: 100%; font-size: 11pt; }
             
-            /* --- MOD SLIP KHAS --- */
-            /* Jika dalam mode slip, sorok app utama sepenuhnya */
-            body.print-slip-mode #mainApp { display: none !important; }
+            /* Input borders remove on print */
+            .input-kos { border: none; background: transparent; text-align: right; width: auto; padding: 0; }
             
-            /* Tunjuk Slip Area dan paksa background putih (penting untuk mobile) */
+            /* --- MOD SLIP KHAS --- */
+            body.print-slip-mode #mainApp { display: none !important; }
             body.print-slip-mode #customSlipArea { 
                 display: block !important; 
                 font-family: 'Courier New', Courier, monospace; 
                 color: black;
-                position: absolute; 
-                top: 0; 
-                left: 0; 
-                width: 100%;
-                height: 100%;
-                background: white; 
-                z-index: 9999;
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                background: white; z-index: 9999;
             }
-            
             .slip-card {
-                border: 2px solid #000;
-                padding: 20px;
-                margin-top: 20px;
-                width: 90%;
-                max-width: 700px;
-                margin-left: auto; margin-right: auto;
-                background: white;
+                border: 2px solid #000; padding: 20px; margin-top: 20px;
+                width: 90%; max-width: 700px; margin-left: auto; margin-right: auto; background: white;
             }
             .slip-header { text-align: center; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; font-size: 14pt; }
             .slip-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12pt; border-bottom: 1px dotted #ccc; }
@@ -148,7 +121,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V2.6)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V2.7)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
@@ -179,23 +152,28 @@
             </table>
         </div>
 
-        <h3>1. Ringkasan Kos</h3>
+        <h3>1. Ringkasan Kos (Key-In Manual)</h3>
         <div class="summary-wrapper">
             <table class="summary-table">
                 <thead>
-                    <tr><th rowspan="2">Bulan</th><th rowspan="2" class="col-sum-masuk">Jumlah Masuk</th><th colspan="4" style="background:#555">Tolakan Kos</th><th rowspan="2" class="col-pusaka">Mak (1/2)</th><th rowspan="2" class="col-pusaka">Pusaka (1/2)</th></tr>
-                    <tr><th class="col-kos">10% Wak Aji</th><th class="col-kos">20% Selenggara</th><th class="col-kos">Kos Tetap (800)</th><th class="col-clean">Bersih</th></tr>
+                    <tr><th rowspan="2">Bulan</th><th rowspan="2" class="col-sum-masuk">Jumlah Masuk</th><th colspan="4" style="background:#555">Tolakan Kos (Manual)</th><th rowspan="2" class="col-pusaka">Mak (1/2)</th><th rowspan="2" class="col-pusaka">Pusaka (1/2)</th></tr>
+                    <tr>
+                        <th class="col-kos">Wak Aji (Key In)</th>
+                        <th class="col-kos">20% Selenggara</th>
+                        <th class="col-kos">Bil / Upah (Key In)</th>
+                        <th class="col-clean">Bersih</th>
+                    </tr>
                 </thead>
                 <tbody id="summaryBodyCost"></tbody>
             </table>
         </div>
 
         <div id="faraidSection">
-            <div id="faraidControls">
+            <div id="faraidControls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background: #e8f6f3; padding: 10px; border-radius: 5px; border: 1px solid #d1f2eb;">
                 <h3 style="margin:0; border:none; padding:0; font-size:16px;">2. Slip Agihan Faraid</h3>
-                <div class="slip-control-group">
+                <div style="display:flex; gap: 5px; align-items: center; flex-wrap:wrap;">
                     <label style="margin:0;">Pilih Bulan:</label>
-                    <input type="month" id="slipMonthInput">
+                    <input type="month" id="slipMonthInput" style="padding: 5px;">
                     <button class="btn-faraid-pdf" onclick="printCustomSlip()">📄 Cetak Slip</button>
                 </div>
             </div>
@@ -235,7 +213,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         // --- TEPEK CONFIG FIREBASE ANDA DI SINI ---
@@ -253,10 +231,16 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
         const tablesCollection = collection(db, "transaksi_faraid");
+        // COLLECTION BARU UNTUK SIMPAN KOS MANUAL
+        const costsCollection = collection(db, "kos_bulanan_faraid"); 
 
-        // --- MASUKKAN EMAIL FAMILY DI SINI ---
         const allowedEmails = ["isye99@gmail.com", "sysuhaila@gmail.com"];
         let unsubscribeSnapshot = null;
+        let unsubscribeCosts = null;
+
+        // GLOBAL VARIABLES
+        window.globalRecords = [];
+        window.globalCosts = {}; // Simpan data kos manual
 
         // --- AUTH ---
         window.loginGoogle = async () => {
@@ -273,6 +257,7 @@
         window.logout = async () => {
             if(confirm("Log Keluar?")) {
                 if(unsubscribeSnapshot) unsubscribeSnapshot();
+                if(unsubscribeCosts) unsubscribeCosts();
                 await signOut(auth);
             }
         };
@@ -292,15 +277,171 @@
         });
 
         function initApp() {
+            // 1. Dengar Data Transaksi
             const q = query(tablesCollection, orderBy("timestamp", "asc"));
             unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
                 let records = [];
                 snapshot.forEach((doc) => { records.push({ id: doc.id, ...doc.data() }); });
-                renderTable(records);
-            }, (error) => { alert("Gagal membaca data: " + error.message); });
+                window.globalRecords = records;
+                renderAll(); // Render bila transaksi berubah
+            }, (error) => { alert("Gagal membaca data transaksi."); });
+
+            // 2. Dengar Data Kos Manual (Real-time)
+            unsubscribeCosts = onSnapshot(costsCollection, (snapshot) => {
+                let costs = {};
+                snapshot.forEach((doc) => {
+                    costs[doc.id] = doc.data(); // doc.id ialah 'YYYY-MM'
+                });
+                window.globalCosts = costs;
+                renderAll(); // Render bila kos berubah
+            });
         }
 
-        // --- ADD DATA ---
+        function renderAll() {
+            if(!window.globalRecords) return;
+            // Render Table Utama
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
+            let bal = 0;
+            window.globalRecords.forEach((r) => {
+                bal += parseFloat(r.masuk) - parseFloat(r.keluar);
+                let attach = r.fileURL ? `<a href="${r.fileURL}" target="_blank" style="color:blue">Fail</a>` : '-';
+                tbody.innerHTML += `<tr>
+                    <td class="col-date">${r.date}</td>
+                    <td class="col-cat">${r.category}</td>
+                    <td class="col-felda">${r.feldaDate || '-'}</td>
+                    <td class="col-desc">${r.desc}</td>
+                    <td class="col-masuk">${r.masuk>0?r.masuk.toFixed(2):'-'}</td>
+                    <td class="col-keluar">${r.keluar>0?r.keluar.toFixed(2):'-'}</td>
+                    <td class="col-baki">${bal.toFixed(2)}</td>
+                    <td class="col-attach">${attach}</td>
+                    <td style="text-align:center"><button onclick="deleteRow('${r.id}')" style="background:red; color:white; font-size:10px;">X</button></td>
+                </tr>`;
+            });
+
+            // Generate Summary Data (Gabung Transaksi + Kos Manual)
+            window.globalSummaryData = generateSummaryData(window.globalRecords, window.globalCosts);
+            renderSummary(window.globalSummaryData);
+        }
+
+        // --- NEW LOGIC: GUNAKAN KOS MANUAL ---
+        function generateSummaryData(records, costs) {
+            let summaryData = {};
+            // Kumpul Income dulu
+            records.forEach(r => {
+                if (r.category === 'Hasil Kebun' && r.masuk > 0) {
+                    const monthKey = r.date.substring(0, 7); 
+                    if (!summaryData[monthKey]) summaryData[monthKey] = 0;
+                    summaryData[monthKey] += parseFloat(r.masuk);
+                }
+            });
+            
+            let resultList = [];
+            Object.keys(summaryData).sort().forEach(monthKey => {
+                const totalMasuk = summaryData[monthKey];
+                
+                // DAPATKAN VALUE KOS DARI DATABASE (ATAU 0 JIKA TIADA)
+                const costData = costs[monthKey] || {};
+                const manualWakAji = parseFloat(costData.wakAji) || 0; // Key-in
+                const manualBilUpah = parseFloat(costData.bilUpah) || 0; // Key-in
+                
+                // Kiraan Faraid
+                // 20% Selenggara masih auto (sebab tak diminta ubah)
+                const selenggara = totalMasuk * 0.20; 
+                
+                // Formula Baru:
+                let grossAvailable = totalMasuk - manualWakAji - selenggara;
+                let fixedCost = grossAvailable < manualBilUpah ? grossAvailable : manualBilUpah; 
+                if(fixedCost < 0) fixedCost = 0;
+                
+                let bersih = grossAvailable - fixedCost;
+                if(bersih < 0) bersih = 0;
+
+                const makHalf = bersih / 2;     
+                const pusakaAbah = bersih / 2;  
+
+                const sMak = (400 / 2304) * pusakaAbah;
+                const sYati = (336 / 2304) * pusakaAbah;
+                const sEla = (336 / 2304) * pusakaAbah;
+                const sIjat = (672 / 2304) * pusakaAbah;
+                const sIna = (84 / 2304) * pusakaAbah;
+                const sPah = (119 / 2304) * pusakaAbah;
+                const sKila = (119 / 2304) * pusakaAbah;
+                const sAyed = (238 / 2304) * pusakaAbah;
+
+                const picIjat = makHalf + sMak + sYati + sEla + sIjat;
+                const picEna = sIna + sPah + sKila + sAyed;
+                
+                let monthName = monthKey;
+                try { monthName = new Date(monthKey + "-01").toLocaleDateString('ms-MY', { year: 'numeric', month: 'long' }); } catch(e) {}
+
+                resultList.push({
+                    monthKey, monthName, totalMasuk, 
+                    wakAji: manualWakAji, // Value manual
+                    selenggara, 
+                    fixedCost: fixedCost, // Ini nilai Bil/Upah yg ditolak
+                    displayBilUpah: manualBilUpah, // Ini nilai Bil/Upah asal yg ditaip
+                    bersih, makHalf, pusakaAbah,
+                    sMak, sYati, sEla, sIjat, sIna, sPah, sKila, sAyed, picIjat, picEna
+                });
+            });
+            return resultList;
+        }
+
+        // --- RENDER INPUT BOX DALAM TABLE ---
+        function renderSummary(data) {
+            const bodyCost = document.getElementById('summaryBodyCost');
+            const bodyDist = document.getElementById('summaryBodyDist');
+            bodyCost.innerHTML = ''; bodyDist.innerHTML = '';
+
+            data.forEach(d => {
+                // INPUT KEY-IN: Ada onchange event untuk auto-save ke database
+                bodyCost.innerHTML += `<tr>
+                    <td>${d.monthName}</td>
+                    <td class="col-sum-masuk">${d.totalMasuk.toFixed(2)}</td>
+                    
+                    <td class="col-kos">
+                        <input type="number" class="input-kos" value="${d.wakAji}" 
+                        onchange="window.updateCost('${d.monthKey}', 'wakAji', this.value)">
+                    </td>
+                    
+                    <td class="col-kos">${d.selenggara.toFixed(2)}</td>
+                    
+                    <td class="col-kos">
+                        <input type="number" class="input-kos" value="${d.displayBilUpah}" 
+                        onchange="window.updateCost('${d.monthKey}', 'bilUpah', this.value)">
+                    </td>
+                    
+                    <td class="col-clean">${d.bersih.toFixed(2)}</td>
+                    <td class="col-pusaka">${d.makHalf.toFixed(2)}</td>
+                    <td class="col-pusaka">${d.pusakaAbah.toFixed(2)}</td>
+                </tr>`;
+
+                bodyDist.innerHTML += `<tr>
+                    <td>${d.monthName}</td>
+                    <td class="col-waris">${d.sMak.toFixed(2)}</td>
+                    <td class="col-waris">${d.sYati.toFixed(2)}</td>
+                    <td class="col-waris">${d.sEla.toFixed(2)}</td>
+                    <td class="col-waris">${d.sIjat.toFixed(2)}</td>
+                    <td class="col-waris">${d.sIna.toFixed(2)}</td>
+                    <td class="col-waris">${d.sPah.toFixed(2)}</td>
+                    <td class="col-waris">${d.sKila.toFixed(2)}</td>
+                    <td class="col-waris">${d.sAyed.toFixed(2)}</td>
+                    <td class="pic-ijat">${d.picIjat.toFixed(2)}</td>
+                    <td class="pic-ena">${d.picEna.toFixed(2)}</td>
+                </tr>`;
+            });
+        }
+
+        // --- FUNGSI SAVE KOS MANUAL KE FIREBASE ---
+        window.updateCost = async function(monthKey, type, value) {
+            const numVal = parseFloat(value) || 0;
+            // Save guna setDoc dengan merge:true supaya tak padam data lain dalam bulan tu
+            await setDoc(doc(db, "kos_bulanan_faraid", monthKey), {
+                [type]: numVal
+            }, { merge: true });
+        }
+
+        // ADD DATA
         window.addData = async function() {
             const btn = document.querySelector('.btn-add');
             btn.innerText = "Uploading..."; btn.disabled = true;
@@ -346,138 +487,19 @@
             if(confirm("Padam rekod?")) await deleteDoc(doc(db, "transaksi_faraid", id));
         }
 
-        function renderTable(records) {
-            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
-            let bal = 0;
-
-            records.forEach((r) => {
-                bal += parseFloat(r.masuk) - parseFloat(r.keluar);
-                let attach = r.fileURL ? `<a href="${r.fileURL}" target="_blank" style="color:blue">Fail</a>` : '-';
-                tbody.innerHTML += `<tr>
-                    <td class="col-date">${r.date}</td>
-                    <td class="col-cat">${r.category}</td>
-                    <td class="col-felda">${r.feldaDate || '-'}</td>
-                    <td class="col-desc">${r.desc}</td>
-                    <td class="col-masuk">${r.masuk>0?r.masuk.toFixed(2):'-'}</td>
-                    <td class="col-keluar">${r.keluar>0?r.keluar.toFixed(2):'-'}</td>
-                    <td class="col-baki">${bal.toFixed(2)}</td>
-                    <td class="col-attach">${attach}</td>
-                    <td style="text-align:center"><button onclick="deleteRow('${r.id}')" style="background:red; color:white; font-size:10px;">X</button></td>
-                </tr>`;
-            });
-            window.globalRecords = records; 
-            window.globalSummaryData = generateSummaryData(records);
-            renderSummary(window.globalSummaryData);
-        }
-
-        function generateSummaryData(records) {
-            let summaryData = {};
-            records.forEach(r => {
-                if (r.category === 'Hasil Kebun' && r.masuk > 0) {
-                    const monthKey = r.date.substring(0, 7); 
-                    if (!summaryData[monthKey]) summaryData[monthKey] = 0;
-                    summaryData[monthKey] += parseFloat(r.masuk);
-                }
-            });
-            
-            let resultList = [];
-            Object.keys(summaryData).sort().forEach(monthKey => {
-                const totalMasuk = summaryData[monthKey];
-                const wakAji = totalMasuk * 0.10;
-                const selenggara = totalMasuk * 0.20;
-                const targetFixedCost = 800;
-                let grossAvailable = totalMasuk - wakAji - selenggara;
-                let fixedCost = grossAvailable < targetFixedCost ? grossAvailable : targetFixedCost;
-                if(fixedCost < 0) fixedCost = 0;
-                let bersih = grossAvailable - fixedCost;
-                if(bersih < 0) bersih = 0;
-
-                const makHalf = bersih / 2;     
-                const pusakaAbah = bersih / 2;  
-
-                const sMak = (400 / 2304) * pusakaAbah;
-                const sYati = (336 / 2304) * pusakaAbah;
-                const sEla = (336 / 2304) * pusakaAbah;
-                const sIjat = (672 / 2304) * pusakaAbah;
-                const sIna = (84 / 2304) * pusakaAbah;
-                const sPah = (119 / 2304) * pusakaAbah;
-                const sKila = (119 / 2304) * pusakaAbah;
-                const sAyed = (238 / 2304) * pusakaAbah;
-
-                const picIjat = makHalf + sMak + sYati + sEla + sIjat;
-                const picEna = sIna + sPah + sKila + sAyed;
-                
-                let monthName = monthKey;
-                try { monthName = new Date(monthKey + "-01").toLocaleDateString('ms-MY', { year: 'numeric', month: 'long' }); } catch(e) {}
-
-                resultList.push({
-                    monthKey,
-                    monthName, totalMasuk, wakAji, selenggara, fixedCost, bersih, makHalf, pusakaAbah,
-                    sMak, sYati, sEla, sIjat, sIna, sPah, sKila, sAyed, picIjat, picEna
-                });
-            });
-            return resultList;
-        }
-
-        function renderSummary(data) {
-            const bodyCost = document.getElementById('summaryBodyCost');
-            const bodyDist = document.getElementById('summaryBodyDist');
-            bodyCost.innerHTML = ''; bodyDist.innerHTML = '';
-
-            data.forEach(d => {
-                bodyCost.innerHTML += `<tr>
-                    <td>${d.monthName}</td>
-                    <td class="col-sum-masuk">${d.totalMasuk.toFixed(2)}</td>
-                    <td class="col-kos">${d.wakAji.toFixed(2)}</td>
-                    <td class="col-kos">${d.selenggara.toFixed(2)}</td>
-                    <td class="col-kos">${d.fixedCost.toFixed(2)}</td>
-                    <td class="col-clean">${d.bersih.toFixed(2)}</td>
-                    <td class="col-pusaka">${d.makHalf.toFixed(2)}</td>
-                    <td class="col-pusaka">${d.pusakaAbah.toFixed(2)}</td>
-                </tr>`;
-
-                bodyDist.innerHTML += `<tr>
-                    <td>${d.monthName}</td>
-                    <td class="col-waris">${d.sMak.toFixed(2)}</td>
-                    <td class="col-waris">${d.sYati.toFixed(2)}</td>
-                    <td class="col-waris">${d.sEla.toFixed(2)}</td>
-                    <td class="col-waris">${d.sIjat.toFixed(2)}</td>
-                    <td class="col-waris">${d.sIna.toFixed(2)}</td>
-                    <td class="col-waris">${d.sPah.toFixed(2)}</td>
-                    <td class="col-waris">${d.sKila.toFixed(2)}</td>
-                    <td class="col-waris">${d.sAyed.toFixed(2)}</td>
-                    <td class="pic-ijat">${d.picIjat.toFixed(2)}</td>
-                    <td class="pic-ena">${d.picEna.toFixed(2)}</td>
-                </tr>`;
-            });
-        }
-
-        // --- NEW LOGIC: PRINT SPECIFIC MONTH (MOBILE FIX) ---
+        // --- PRINT SLIP (MOBILE FIX) ---
         window.printCustomSlip = function() {
-            // 1. Dapatkan Bulan
             const selectedMonth = document.getElementById('slipMonthInput').value; 
             if (!selectedMonth) { 
-                alert("Sila pilih bulan dahulu."); 
-                document.getElementById('slipMonthInput').focus();
-                return; 
+                alert("Sila pilih bulan dahulu."); document.getElementById('slipMonthInput').focus(); return; 
             }
-
-            // 2. Cari Data
-            if (!window.globalSummaryData || window.globalSummaryData.length === 0) {
-                alert("Tiada data."); return;
-            }
+            if (!window.globalSummaryData || window.globalSummaryData.length === 0) { alert("Tiada data."); return; }
 
             const d = window.globalSummaryData.find(item => item.monthKey === selectedMonth);
+            if (!d) { alert("Tiada rekod untuk bulan: " + selectedMonth); return; }
 
-            if (!d) {
-                alert("Tiada rekod untuk bulan: " + selectedMonth);
-                return;
-            }
-
-            // 3. Generate HTML
             const slipArea = document.getElementById('customSlipArea');
             slipArea.innerHTML = ''; 
-
             const totalMak = d.makHalf + d.sMak;
 
             let slipHtml = `
@@ -486,7 +508,6 @@
                     Penyata Bulanan Agihan Faraid Arwah Abah (Hasil Kebun)<br>
                     Tempoh: ${d.monthName}
                 </div>
-
                 <div class="slip-group">
                     <div class="slip-row"><span>Mak (1/2 + 400/2304) :</span><span>RM ${totalMak.toFixed(2)}</span></div>
                     <div class="slip-row"><span>Yati (336 / 2304) :</span><span>RM ${d.sYati.toFixed(2)}</span></div>
@@ -494,7 +515,6 @@
                     <div class="slip-row"><span>Ijat (672 / 2304) :</span><span>RM ${d.sIjat.toFixed(2)}</span></div>
                     <div class="slip-row slip-total"><span>Jumlah (Group A):</span><span>RM ${d.picIjat.toFixed(2)}</span></div>
                 </div>
-
                 <div class="slip-group">
                     <div class="slip-row"><span>Ina (84 / 2304) :</span><span>RM ${d.sIna.toFixed(2)}</span></div>
                     <div class="slip-row"><span>Pah (119 / 2304) :</span><span>RM ${d.sPah.toFixed(2)}</span></div>
@@ -502,27 +522,13 @@
                     <div class="slip-row"><span>Ayed (238 / 2304) :</span><span>RM ${d.sAyed.toFixed(2)}</span></div>
                     <div class="slip-row slip-total"><span>Jumlah (Group B):</span><span>RM ${d.picEna.toFixed(2)}</span></div>
                 </div>
-                
-                <div style="margin-top:20px; text-align:center; font-size:10px; color:#555;">
-                    *Dicetak pada: ${new Date().toLocaleString()}
-                </div>
-            </div>
-            `;
+                <div style="margin-top:20px; text-align:center; font-size:10px; color:#555;">*Dicetak pada: ${new Date().toLocaleString()}</div>
+            </div>`;
             slipArea.innerHTML = slipHtml;
-
-            // --- FIX UNTUK PHONE (ANDROID/iOS) ---
-            // Tambah class untuk ubah paparan
             document.body.classList.add('print-slip-mode');
-
-            // Tunggu 500ms (setengah saat) bagi browser render, baru print
             setTimeout(function() {
                 window.print();
-                
-                // Selepas print dialog keluar/tutup, tunggu 1 saat baru balik ke asal
-                setTimeout(function() {
-                    document.body.classList.remove('print-slip-mode');
-                }, 1000);
-                
+                setTimeout(function() { document.body.classList.remove('print-slip-mode'); }, 1000);
             }, 500);
         }
 
