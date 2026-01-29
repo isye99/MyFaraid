@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V2.7 - Key In Kos)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V2.9 - Total Kos)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -121,7 +121,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V2.7)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V2.9)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
@@ -231,16 +231,14 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
         const tablesCollection = collection(db, "transaksi_faraid");
-        // COLLECTION BARU UNTUK SIMPAN KOS MANUAL
         const costsCollection = collection(db, "kos_bulanan_faraid"); 
 
         const allowedEmails = ["isye99@gmail.com", "sysuhaila@gmail.com"];
         let unsubscribeSnapshot = null;
         let unsubscribeCosts = null;
 
-        // GLOBAL VARIABLES
         window.globalRecords = [];
-        window.globalCosts = {}; // Simpan data kos manual
+        window.globalCosts = {}; 
 
         // --- AUTH ---
         window.loginGoogle = async () => {
@@ -277,29 +275,24 @@
         });
 
         function initApp() {
-            // 1. Dengar Data Transaksi
             const q = query(tablesCollection, orderBy("timestamp", "asc"));
             unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
                 let records = [];
                 snapshot.forEach((doc) => { records.push({ id: doc.id, ...doc.data() }); });
                 window.globalRecords = records;
-                renderAll(); // Render bila transaksi berubah
+                renderAll(); 
             }, (error) => { alert("Gagal membaca data transaksi."); });
 
-            // 2. Dengar Data Kos Manual (Real-time)
             unsubscribeCosts = onSnapshot(costsCollection, (snapshot) => {
                 let costs = {};
-                snapshot.forEach((doc) => {
-                    costs[doc.id] = doc.data(); // doc.id ialah 'YYYY-MM'
-                });
+                snapshot.forEach((doc) => { costs[doc.id] = doc.data(); });
                 window.globalCosts = costs;
-                renderAll(); // Render bila kos berubah
+                renderAll(); 
             });
         }
 
         function renderAll() {
             if(!window.globalRecords) return;
-            // Render Table Utama
             const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
             let bal = 0;
             window.globalRecords.forEach((r) => {
@@ -318,15 +311,12 @@
                 </tr>`;
             });
 
-            // Generate Summary Data (Gabung Transaksi + Kos Manual)
             window.globalSummaryData = generateSummaryData(window.globalRecords, window.globalCosts);
             renderSummary(window.globalSummaryData);
         }
 
-        // --- NEW LOGIC: GUNAKAN KOS MANUAL ---
         function generateSummaryData(records, costs) {
             let summaryData = {};
-            // Kumpul Income dulu
             records.forEach(r => {
                 if (r.category === 'Hasil Kebun' && r.masuk > 0) {
                     const monthKey = r.date.substring(0, 7); 
@@ -338,17 +328,12 @@
             let resultList = [];
             Object.keys(summaryData).sort().forEach(monthKey => {
                 const totalMasuk = summaryData[monthKey];
-                
-                // DAPATKAN VALUE KOS DARI DATABASE (ATAU 0 JIKA TIADA)
                 const costData = costs[monthKey] || {};
-                const manualWakAji = parseFloat(costData.wakAji) || 0; // Key-in
-                const manualBilUpah = parseFloat(costData.bilUpah) || 0; // Key-in
+                const manualWakAji = parseFloat(costData.wakAji) || 0; 
+                const manualBilUpah = parseFloat(costData.bilUpah) || 0; 
                 
-                // Kiraan Faraid
-                // 20% Selenggara masih auto (sebab tak diminta ubah)
                 const selenggara = totalMasuk * 0.20; 
                 
-                // Formula Baru:
                 let grossAvailable = totalMasuk - manualWakAji - selenggara;
                 let fixedCost = grossAvailable < manualBilUpah ? grossAvailable : manualBilUpah; 
                 if(fixedCost < 0) fixedCost = 0;
@@ -368,6 +353,7 @@
                 const sKila = (119 / 2304) * pusakaAbah;
                 const sAyed = (238 / 2304) * pusakaAbah;
 
+                // PIC Totals
                 const picIjat = makHalf + sMak + sYati + sEla + sIjat;
                 const picEna = sIna + sPah + sKila + sAyed;
                 
@@ -376,10 +362,10 @@
 
                 resultList.push({
                     monthKey, monthName, totalMasuk, 
-                    wakAji: manualWakAji, // Value manual
+                    wakAji: manualWakAji, 
                     selenggara, 
-                    fixedCost: fixedCost, // Ini nilai Bil/Upah yg ditolak
-                    displayBilUpah: manualBilUpah, // Ini nilai Bil/Upah asal yg ditaip
+                    fixedCost: fixedCost, 
+                    displayBilUpah: manualBilUpah, 
                     bersih, makHalf, pusakaAbah,
                     sMak, sYati, sEla, sIjat, sIna, sPah, sKila, sAyed, picIjat, picEna
                 });
@@ -387,30 +373,37 @@
             return resultList;
         }
 
-        // --- RENDER INPUT BOX DALAM TABLE ---
+        // --- RENDER SUMMARY WITH TOTALS ---
         function renderSummary(data) {
             const bodyCost = document.getElementById('summaryBodyCost');
             const bodyDist = document.getElementById('summaryBodyDist');
             bodyCost.innerHTML = ''; bodyDist.innerHTML = '';
 
+            // 1. Init Totals
+            let tMasuk = 0, tWakAji = 0, tSelenggara = 0, tBilUpah = 0, tBersih = 0, tMak = 0, tPusaka = 0;
+
             data.forEach(d => {
-                // INPUT KEY-IN: Ada onchange event untuk auto-save ke database
+                // Accumulate
+                tMasuk += d.totalMasuk;
+                tWakAji += d.wakAji;
+                tSelenggara += d.selenggara;
+                tBilUpah += d.displayBilUpah; 
+                tBersih += d.bersih;
+                tMak += d.makHalf;
+                tPusaka += d.pusakaAbah;
+
                 bodyCost.innerHTML += `<tr>
                     <td>${d.monthName}</td>
                     <td class="col-sum-masuk">${d.totalMasuk.toFixed(2)}</td>
-                    
                     <td class="col-kos">
                         <input type="number" class="input-kos" value="${d.wakAji}" 
                         onchange="window.updateCost('${d.monthKey}', 'wakAji', this.value)">
                     </td>
-                    
                     <td class="col-kos">${d.selenggara.toFixed(2)}</td>
-                    
                     <td class="col-kos">
                         <input type="number" class="input-kos" value="${d.displayBilUpah}" 
                         onchange="window.updateCost('${d.monthKey}', 'bilUpah', this.value)">
                     </td>
-                    
                     <td class="col-clean">${d.bersih.toFixed(2)}</td>
                     <td class="col-pusaka">${d.makHalf.toFixed(2)}</td>
                     <td class="col-pusaka">${d.pusakaAbah.toFixed(2)}</td>
@@ -430,18 +423,27 @@
                     <td class="pic-ena">${d.picEna.toFixed(2)}</td>
                 </tr>`;
             });
+
+            // 2. Append Total Row to Table 1 (Summary Cost)
+            bodyCost.innerHTML += `
+                <tr style="background-color:#2c3e50; color:white; font-weight:bold; border-top: 3px double #fff;">
+                    <td style="text-align:center">JUMLAH BESAR</td>
+                    <td>${tMasuk.toFixed(2)}</td>
+                    <td>${tWakAji.toFixed(2)}</td>
+                    <td>${tSelenggara.toFixed(2)}</td>
+                    <td>${tBilUpah.toFixed(2)}</td>
+                    <td>${tBersih.toFixed(2)}</td>
+                    <td>${tMak.toFixed(2)}</td>
+                    <td>${tPusaka.toFixed(2)}</td>
+                </tr>
+            `;
         }
 
-        // --- FUNGSI SAVE KOS MANUAL KE FIREBASE ---
         window.updateCost = async function(monthKey, type, value) {
             const numVal = parseFloat(value) || 0;
-            // Save guna setDoc dengan merge:true supaya tak padam data lain dalam bulan tu
-            await setDoc(doc(db, "kos_bulanan_faraid", monthKey), {
-                [type]: numVal
-            }, { merge: true });
+            await setDoc(doc(db, "kos_bulanan_faraid", monthKey), { [type]: numVal }, { merge: true });
         }
 
-        // ADD DATA
         window.addData = async function() {
             const btn = document.querySelector('.btn-add');
             btn.innerText = "Uploading..."; btn.disabled = true;
@@ -487,7 +489,7 @@
             if(confirm("Padam rekod?")) await deleteDoc(doc(db, "transaksi_faraid", id));
         }
 
-        // --- PRINT SLIP (MOBILE FIX) ---
+        // --- PRINT SLIP (MOBILE FIX + FARAID ONLY) ---
         window.printCustomSlip = function() {
             const selectedMonth = document.getElementById('slipMonthInput').value; 
             if (!selectedMonth) { 
@@ -500,7 +502,8 @@
 
             const slipArea = document.getElementById('customSlipArea');
             slipArea.innerHTML = ''; 
-            const totalMak = d.makHalf + d.sMak;
+            
+            const totalGroupA = d.sMak + d.sYati + d.sEla + d.sIjat;
 
             let slipHtml = `
             <div class="slip-card">
@@ -509,11 +512,11 @@
                     Tempoh: ${d.monthName}
                 </div>
                 <div class="slip-group">
-                    <div class="slip-row"><span>Mak (1/2 + 400/2304) :</span><span>RM ${totalMak.toFixed(2)}</span></div>
+                    <div class="slip-row"><span>Mak (400/2304) :</span><span>RM ${d.sMak.toFixed(2)}</span></div>
                     <div class="slip-row"><span>Yati (336 / 2304) :</span><span>RM ${d.sYati.toFixed(2)}</span></div>
                     <div class="slip-row"><span>Ela (336 / 2304) :</span><span>RM ${d.sEla.toFixed(2)}</span></div>
                     <div class="slip-row"><span>Ijat (672 / 2304) :</span><span>RM ${d.sIjat.toFixed(2)}</span></div>
-                    <div class="slip-row slip-total"><span>Jumlah (Group A):</span><span>RM ${d.picIjat.toFixed(2)}</span></div>
+                    <div class="slip-row slip-total"><span>Jumlah (Group A):</span><span>RM ${totalGroupA.toFixed(2)}</span></div>
                 </div>
                 <div class="slip-group">
                     <div class="slip-row"><span>Ina (84 / 2304) :</span><span>RM ${d.sIna.toFixed(2)}</span></div>
