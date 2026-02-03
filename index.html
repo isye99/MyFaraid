@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V3.0)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V3.1)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -34,8 +34,11 @@
         th { background-color: #2c3e50; color: white; text-align: center; white-space: nowrap; position: sticky; top: 0; }
         tr:nth-child(even) { background-color: #f9f9f9; } 
         
-        /* Colors */
-        .col-date { text-align: center; background-color: #ecf0f1; width: 100px; font-weight: bold;} 
+        /* --- WARNA KOLUM (DIKEMASKINI: HITAM/GELAP) --- */
+        
+        /* Kolum Tarikh (Transaksi) - Hitam */
+        .col-date { text-align: center; background-color: #222; width: 100px; font-weight: bold; color: white; } 
+        
         .col-cat { text-align: center; background-color: #eaf2f8; color: #2471a3;}
         .col-masuk { background-color: #e8f8f5; font-weight: bold; color: green; } 
         .col-keluar { background-color: #fdedec; font-weight: bold; color: red; } 
@@ -46,7 +49,9 @@
         .col-sum-masuk { background-color: #d5f5e3; font-weight: bold; color: #196f3d; } 
         .col-kos { background-color: #eaecee; color: #555; width: 100px; } 
         .col-pusaka { background-color: #a9cce3; border-left: 2px solid #333; font-weight: bold; } 
-        .col-waris { background-color: #f4f6f7; }
+        
+        /* Kolum Waris (Faraid) - Hitam */
+        .col-waris { background-color: #222; color: white; border: 1px solid #555; }
 
         /* Input Key-In Dalam Table */
         .input-kos { 
@@ -55,7 +60,7 @@
         }
         .input-kos:focus { border-color: #2980b9; outline: none; background: #eaf2f8; }
         
-        .share-fraction { display: block; font-size: 9px; opacity: 0.8; margin-top: 2px; font-weight: normal; }
+        .share-fraction { display: block; font-size: 9px; opacity: 0.8; margin-top: 2px; font-weight: normal; color: #ccc; }
         .pic-ijat { background-color: #d4e6f1; color: #154360; font-weight: bold; border-left: 2px solid #000; } 
         .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000; }
         .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
@@ -127,14 +132,15 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V3.0)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V3.1)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
             <div class="form-group"><label>Kategori</label>
                 <select id="inputCategory" onchange="toggleFeldaInput()">
                     <option value="Hasil Kebun">Hasil Kebun</option>
-                    <option value="Selenggara">Selenggara</option> <option value="Lain-lain">Lain-lain</option>
+                    <option value="Selenggara">Selenggara</option>
+                    <option value="Lain-lain">Lain-lain</option>
                 </select>
             </div>
             <div class="form-group"><label>Tarikh Resit Felda</label><input type="date" id="inputFeldaDate"></div>
@@ -340,21 +346,14 @@
 
             window.globalSummaryData = generateSummaryData(window.globalRecords, window.globalCosts);
             renderSummary(window.globalSummaryData);
-            
-            // --- KIRAAN UNTUK BAHAGIAN 3: REKOD SELENGGARA ---
             renderMaintenanceSection();
         }
 
         function renderMaintenanceSection() {
-            // 1. Kira Dana Terkumpul (Sum of 20% column from Summary)
             let totalDana = 0;
             if(window.globalSummaryData) {
-                window.globalSummaryData.forEach(d => {
-                    totalDana += d.selenggara;
-                });
+                window.globalSummaryData.forEach(d => { totalDana += d.selenggara; });
             }
-
-            // 2. Kira Jumlah Bayaran Selenggara (Sum of Keluar where Category == 'Selenggara')
             let totalBayaran = 0;
             if(window.globalRecords) {
                 window.globalRecords.forEach(r => {
@@ -363,11 +362,7 @@
                     }
                 });
             }
-
-            // 3. Kira Baki
             let baki = totalDana - totalBayaran;
-
-            // 4. Update UI
             document.getElementById('danaTerkumpulDisplay').innerText = "RM " + totalDana.toFixed(2);
             document.getElementById('bayaranSelenggaraDisplay').innerText = "RM " + totalBayaran.toFixed(2);
             document.getElementById('bakiSelenggaraDisplay').innerText = "RM " + baki.toFixed(2);
@@ -542,7 +537,6 @@
             if(confirm("Padam rekod?")) await deleteDoc(doc(db, "transaksi_faraid", id));
         }
 
-        // --- PRINT SLIP (MOBILE FIX + FARAID ONLY) ---
         window.printCustomSlip = function() {
             const selectedMonth = document.getElementById('slipMonthInput').value; 
             if (!selectedMonth) { 
