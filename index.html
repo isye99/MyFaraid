@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V2.9 - Total Kos)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V3.0)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -60,6 +60,11 @@
         .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000; }
         .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
 
+        /* Maintenance Section Style */
+        .maintenance-box { background: #eaf2f8; padding: 20px; border-radius: 8px; border: 1px solid #d6eaf8; width: 100%; max-width: 500px; }
+        .maintenance-row { display: flex; justify-content: space-between; border-bottom: 1px solid #ccc; padding: 8px 0; }
+        .maintenance-total { font-weight: bold; font-size: 16px; color: #2c3e50; border-top: 2px solid #000; border-bottom: none; margin-top: 10px; }
+
         /* Mobile Responsive */
         @media screen and (max-width: 768px) {
             body { padding: 10px; }
@@ -67,6 +72,7 @@
             .form-group input, .form-group select { width: 100% !important; box-sizing: border-box; }
             .btn-add, .btn-export, .btn-pdf, .btn-faraid-pdf { width: 100%; padding: 15px; font-size: 16px; margin: 5px 0; }
             #faraidControls { flex-direction: column; gap: 10px; }
+            .maintenance-box { width: auto; }
         }
 
         /* Login Screen */
@@ -83,7 +89,7 @@
             .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, #faraidControls { display: none !important; }
             @page { size: landscape; margin: 10mm; } 
             body { zoom: 100%; padding: 0; background: white; }
-            .table-wrapper, .summary-wrapper { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
+            .table-wrapper, .summary-wrapper, .maintenance-box { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
             table { min-width: auto; width: 100%; font-size: 11pt; }
             
             /* Input borders remove on print */
@@ -121,13 +127,18 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V2.9)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V3.0)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
-            <div class="form-group"><label>Kategori</label><select id="inputCategory" onchange="toggleFeldaInput()"><option value="Hasil Kebun">Hasil Kebun</option><option value="Lain-lain">Lain-lain</option></select></div>
+            <div class="form-group"><label>Kategori</label>
+                <select id="inputCategory" onchange="toggleFeldaInput()">
+                    <option value="Hasil Kebun">Hasil Kebun</option>
+                    <option value="Selenggara">Selenggara</option> <option value="Lain-lain">Lain-lain</option>
+                </select>
+            </div>
             <div class="form-group"><label>Tarikh Resit Felda</label><input type="date" id="inputFeldaDate"></div>
-            <div class="form-group"><label>Catatan</label><input type="text" id="inputDesc" placeholder="Contoh: Jualan Durian"></div>
+            <div class="form-group"><label>Catatan</label><input type="text" id="inputDesc" placeholder="Contoh: Beli Baja"></div>
             <div class="form-group"><label>Lampiran</label><input type="file" id="inputFile" accept="image/*,application/pdf"></div>
             
             <div class="form-group"><label>MASUK (RM)</label><input type="number" id="inputMasuk" placeholder="0.00" oninput="toggleInput('masuk')"></div>
@@ -200,6 +211,22 @@
                     </thead>
                     <tbody id="summaryBodyDist"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <h3>3. Rekod Selenggara Kebun</h3>
+        <div class="maintenance-box">
+            <div class="maintenance-row">
+                <span>(a) Dana Selenggara Terkumpul (20% Dari Hasil)</span>
+                <span style="color:green; font-weight:bold" id="danaTerkumpulDisplay">RM 0.00</span>
+            </div>
+            <div class="maintenance-row">
+                <span>(b) Jumlah Bayaran Selenggara Kebun (Telah Diguna)</span>
+                <span style="color:red; font-weight:bold" id="bayaranSelenggaraDisplay">RM 0.00</span>
+            </div>
+            <div class="maintenance-row maintenance-total">
+                <span>(c) Baki Duit Selenggara (a - b)</span>
+                <span style="color:blue" id="bakiSelenggaraDisplay">RM 0.00</span>
             </div>
         </div>
 
@@ -313,6 +340,37 @@
 
             window.globalSummaryData = generateSummaryData(window.globalRecords, window.globalCosts);
             renderSummary(window.globalSummaryData);
+            
+            // --- KIRAAN UNTUK BAHAGIAN 3: REKOD SELENGGARA ---
+            renderMaintenanceSection();
+        }
+
+        function renderMaintenanceSection() {
+            // 1. Kira Dana Terkumpul (Sum of 20% column from Summary)
+            let totalDana = 0;
+            if(window.globalSummaryData) {
+                window.globalSummaryData.forEach(d => {
+                    totalDana += d.selenggara;
+                });
+            }
+
+            // 2. Kira Jumlah Bayaran Selenggara (Sum of Keluar where Category == 'Selenggara')
+            let totalBayaran = 0;
+            if(window.globalRecords) {
+                window.globalRecords.forEach(r => {
+                    if (r.category === 'Selenggara' && r.keluar > 0) {
+                        totalBayaran += parseFloat(r.keluar);
+                    }
+                });
+            }
+
+            // 3. Kira Baki
+            let baki = totalDana - totalBayaran;
+
+            // 4. Update UI
+            document.getElementById('danaTerkumpulDisplay').innerText = "RM " + totalDana.toFixed(2);
+            document.getElementById('bayaranSelenggaraDisplay').innerText = "RM " + totalBayaran.toFixed(2);
+            document.getElementById('bakiSelenggaraDisplay').innerText = "RM " + baki.toFixed(2);
         }
 
         function generateSummaryData(records, costs) {
@@ -353,7 +411,6 @@
                 const sKila = (119 / 2304) * pusakaAbah;
                 const sAyed = (238 / 2304) * pusakaAbah;
 
-                // PIC Totals
                 const picIjat = makHalf + sMak + sYati + sEla + sIjat;
                 const picEna = sIna + sPah + sKila + sAyed;
                 
@@ -373,17 +430,14 @@
             return resultList;
         }
 
-        // --- RENDER SUMMARY WITH TOTALS ---
         function renderSummary(data) {
             const bodyCost = document.getElementById('summaryBodyCost');
             const bodyDist = document.getElementById('summaryBodyDist');
             bodyCost.innerHTML = ''; bodyDist.innerHTML = '';
 
-            // 1. Init Totals
             let tMasuk = 0, tWakAji = 0, tSelenggara = 0, tBilUpah = 0, tBersih = 0, tMak = 0, tPusaka = 0;
 
             data.forEach(d => {
-                // Accumulate
                 tMasuk += d.totalMasuk;
                 tWakAji += d.wakAji;
                 tSelenggara += d.selenggara;
@@ -424,7 +478,6 @@
                 </tr>`;
             });
 
-            // 2. Append Total Row to Table 1 (Summary Cost)
             bodyCost.innerHTML += `
                 <tr style="background-color:#2c3e50; color:white; font-weight:bold; border-top: 3px double #fff;">
                     <td style="text-align:center">JUMLAH BESAR</td>
