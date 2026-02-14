@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V3.1)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V3.2)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -34,26 +34,18 @@
         th { background-color: #2c3e50; color: white; text-align: center; white-space: nowrap; position: sticky; top: 0; }
         tr:nth-child(even) { background-color: #f9f9f9; } 
         
-        /* --- WARNA KOLUM (DIKEMASKINI: HITAM/GELAP) --- */
-        
-        /* Kolum Tarikh (Transaksi) - Hitam */
-        .col-date { text-align: center; background-color: #222; width: 100px; font-weight: bold; color: white; } 
-        
+        /* WARNA KOLUM (GELAP) */
+        .col-date { text-align: center; background-color: #222; width: 100px; font-weight: bold; color: white;} 
         .col-cat { text-align: center; background-color: #eaf2f8; color: #2471a3;}
         .col-masuk { background-color: #e8f8f5; font-weight: bold; color: green; } 
         .col-keluar { background-color: #fdedec; font-weight: bold; color: red; } 
         .col-baki { background-color: #fff3cd; font-weight: bold; color: #000;} 
-        .col-clean { background-color: #eafaf1; font-weight: bold; color: #0099ff; }
         
-        /* Summary Table Specifics */
-        .col-sum-masuk { background-color: #d5f5e3; font-weight: bold; color: #196f3d; } 
         .col-kos { background-color: #eaecee; color: #555; width: 100px; } 
         .col-pusaka { background-color: #a9cce3; border-left: 2px solid #333; font-weight: bold; } 
-        
-        /* Kolum Waris (Faraid) - Hitam */
-        .col-waris { background-color: #222; color: white; border: 1px solid #555; }
+        .col-waris { background-color: #222; color: white; border: 1px solid #555; } /* Header Gelap */
 
-        /* Input Key-In Dalam Table */
+        /* Input Key-In */
         .input-kos { 
             width: 80px; text-align: right; border: 1px solid #ccc; 
             padding: 5px; border-radius: 3px; font-weight: bold; color: #c0392b;
@@ -61,11 +53,15 @@
         .input-kos:focus { border-color: #2980b9; outline: none; background: #eaf2f8; }
         
         .share-fraction { display: block; font-size: 9px; opacity: 0.8; margin-top: 2px; font-weight: normal; color: #ccc; }
+        
         .pic-ijat { background-color: #d4e6f1; color: #154360; font-weight: bold; border-left: 2px solid #000; } 
         .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000; }
-        .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
+        
+        /* New Section Colors */
+        .col-mak-total { background-color: #d1f2eb; font-weight: bold; color: #0e6251; border-right: 2px solid #000; }
+        .col-anak-mak { background-color: #fff8e1; color: #795548; font-weight: bold; }
 
-        /* Maintenance Section Style */
+        .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
         .maintenance-box { background: #eaf2f8; padding: 20px; border-radius: 8px; border: 1px solid #d6eaf8; width: 100%; max-width: 500px; }
         .maintenance-row { display: flex; justify-content: space-between; border-bottom: 1px solid #ccc; padding: 8px 0; }
         .maintenance-total { font-weight: bold; font-size: 16px; color: #2c3e50; border-top: 2px solid #000; border-bottom: none; margin-top: 10px; }
@@ -80,12 +76,7 @@
             .maintenance-box { width: auto; }
         }
 
-        /* Login Screen */
-        #loginContainer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #ecf0f1; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 1000; padding: 20px;
-        }
+        #loginContainer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ecf0f1; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
         #mainApp { display: none; } 
         #customSlipArea { display: none; }
 
@@ -96,23 +87,13 @@
             body { zoom: 100%; padding: 0; background: white; }
             .table-wrapper, .summary-wrapper, .maintenance-box { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
             table { min-width: auto; width: 100%; font-size: 11pt; }
-            
-            /* Input borders remove on print */
             .input-kos { border: none; background: transparent; text-align: right; width: auto; padding: 0; }
             
-            /* --- MOD SLIP KHAS --- */
             body.print-slip-mode #mainApp { display: none !important; }
             body.print-slip-mode #customSlipArea { 
-                display: block !important; 
-                font-family: 'Courier New', Courier, monospace; 
-                color: black;
-                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-                background: white; z-index: 9999;
+                display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999;
             }
-            .slip-card {
-                border: 2px solid #000; padding: 20px; margin-top: 20px;
-                width: 90%; max-width: 700px; margin-left: auto; margin-right: auto; background: white;
-            }
+            .slip-card { border: 2px solid #000; padding: 20px; margin-top: 20px; width: 90%; max-width: 700px; margin-left: auto; margin-right: auto; background: white; }
             .slip-header { text-align: center; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; font-size: 14pt; }
             .slip-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12pt; border-bottom: 1px dotted #ccc; }
             .slip-total { border-top: 2px solid #000; border-bottom: 4px double #000; margin-top: 10px; padding-top: 5px; font-weight: bold; font-size: 13pt; background: #eee; -webkit-print-color-adjust: exact;}
@@ -132,7 +113,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V3.1)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V3.2)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
@@ -144,7 +125,7 @@
                 </select>
             </div>
             <div class="form-group"><label>Tarikh Resit Felda</label><input type="date" id="inputFeldaDate"></div>
-            <div class="form-group"><label>Catatan</label><input type="text" id="inputDesc" placeholder="Contoh: Beli Baja"></div>
+            <div class="form-group"><label>Catatan</label><input type="text" id="inputDesc" placeholder="Contoh: Jualan Durian"></div>
             <div class="form-group"><label>Lampiran</label><input type="file" id="inputFile" accept="image/*,application/pdf"></div>
             
             <div class="form-group"><label>MASUK (RM)</label><input type="number" id="inputMasuk" placeholder="0.00" oninput="toggleInput('masuk')"></div>
@@ -236,6 +217,22 @@
             </div>
         </div>
 
+        <h3>4. Simulasi Faraid Harta Mak (Jika Berlaku Kematian)</h3>
+        <div class="summary-wrapper">
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th class="col-date">Bulan</th>
+                        <th class="col-mak-total">Harta Mak (RM)<br><span style="font-size:10px; font-weight:normal">(1/2 Harta + 400/2304)</span></th>
+                        <th class="col-anak-mak">Ijat (1/2)</th>
+                        <th class="col-anak-mak">Yati (1/4)</th>
+                        <th class="col-anak-mak">Ela (1/4)</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryMakFaraid"></tbody>
+            </table>
+        </div>
+
         <div class="summary-box">
             <strong>Status:</strong> Log masuk sebagai <span id="userEmailDisplay" style="font-weight:bold; color:blue;"></span>.
         </div>
@@ -249,7 +246,6 @@
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-        // --- TEPEK CONFIG FIREBASE ANDA DI SINI ---
         const firebaseConfig = {
             apiKey: "AIzaSyAaGpKuDs8d3-n5ulueMUInoZhxSRkQXWY",
             authDomain: "myfaraid.firebaseapp.com",
@@ -273,7 +269,6 @@
         window.globalRecords = [];
         window.globalCosts = {}; 
 
-        // --- AUTH ---
         window.loginGoogle = async () => {
             const provider = new GoogleAuthProvider();
             try {
@@ -347,6 +342,7 @@
             window.globalSummaryData = generateSummaryData(window.globalRecords, window.globalCosts);
             renderSummary(window.globalSummaryData);
             renderMaintenanceSection();
+            renderMakFaraid(window.globalSummaryData); // NEW FUNCTION FOR SECTION 4
         }
 
         function renderMaintenanceSection() {
@@ -366,6 +362,30 @@
             document.getElementById('danaTerkumpulDisplay').innerText = "RM " + totalDana.toFixed(2);
             document.getElementById('bayaranSelenggaraDisplay').innerText = "RM " + totalBayaran.toFixed(2);
             document.getElementById('bakiSelenggaraDisplay').innerText = "RM " + baki.toFixed(2);
+        }
+
+        // --- NEW FUNCTION: RENDER SECTION 4 ---
+        function renderMakFaraid(data) {
+            const tbody = document.getElementById('summaryMakFaraid');
+            tbody.innerHTML = '';
+            
+            data.forEach(d => {
+                // Formula: Harta Mak = (1/2 Harta Sepencarian) + (Bahagian Faraid Dia)
+                const hartaMak = d.makHalf + d.sMak;
+                
+                // Agihan jika Mak meninggal
+                const ijatShare = hartaMak * 0.5; // 2 Bahagian
+                const yatiShare = hartaMak * 0.25; // 1 Bahagian
+                const elaShare = hartaMak * 0.25; // 1 Bahagian
+
+                tbody.innerHTML += `<tr>
+                    <td>${d.monthName}</td>
+                    <td class="col-mak-total">${hartaMak.toFixed(2)}</td>
+                    <td class="col-anak-mak">${ijatShare.toFixed(2)}</td>
+                    <td class="col-anak-mak">${yatiShare.toFixed(2)}</td>
+                    <td class="col-anak-mak">${elaShare.toFixed(2)}</td>
+                </tr>`;
+            });
         }
 
         function generateSummaryData(records, costs) {
