@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V3.2)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V3.3 - Gabungan)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -34,7 +34,7 @@
         th { background-color: #2c3e50; color: white; text-align: center; white-space: nowrap; position: sticky; top: 0; }
         tr:nth-child(even) { background-color: #f9f9f9; } 
         
-        /* WARNA KOLUM (GELAP) */
+        /* Colors */
         .col-date { text-align: center; background-color: #222; width: 100px; font-weight: bold; color: white;} 
         .col-cat { text-align: center; background-color: #eaf2f8; color: #2471a3;}
         .col-masuk { background-color: #e8f8f5; font-weight: bold; color: green; } 
@@ -43,7 +43,7 @@
         
         .col-kos { background-color: #eaecee; color: #555; width: 100px; } 
         .col-pusaka { background-color: #a9cce3; border-left: 2px solid #333; font-weight: bold; } 
-        .col-waris { background-color: #222; color: white; border: 1px solid #555; } /* Header Gelap */
+        .col-waris { background-color: #222; color: white; border: 1px solid #555; } 
 
         /* Input Key-In */
         .input-kos { 
@@ -57,9 +57,11 @@
         .pic-ijat { background-color: #d4e6f1; color: #154360; font-weight: bold; border-left: 2px solid #000; } 
         .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000; }
         
-        /* New Section Colors */
         .col-mak-total { background-color: #d1f2eb; font-weight: bold; color: #0e6251; border-right: 2px solid #000; }
         .col-anak-mak { background-color: #fff8e1; color: #795548; font-weight: bold; }
+        
+        /* New Combined Summary Colors */
+        .col-total-final { background-color: #2e86c1; color: white; font-weight: bold; border-left: 2px solid #000; }
 
         .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
         .maintenance-box { background: #eaf2f8; padding: 20px; border-radius: 8px; border: 1px solid #d6eaf8; width: 100%; max-width: 500px; }
@@ -113,7 +115,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V3.2)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V3.3)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
@@ -233,6 +235,22 @@
             </table>
         </div>
 
+        <h3>5. Rumusan Keseluruhan (Gabungan Abah + Mak)</h3>
+        <div class="summary-wrapper">
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th class="col-date">Bulan</th>
+                        <th class="col-waris">Nama Waris</th>
+                        <th class="col-kos">Dari Arwah Abah (RM)</th>
+                        <th class="col-kos">Dari Arwah Mak (RM)</th>
+                        <th class="col-total-final">JUMLAH BESAR (RM)</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryGabungan"></tbody>
+            </table>
+        </div>
+
         <div class="summary-box">
             <strong>Status:</strong> Log masuk sebagai <span id="userEmailDisplay" style="font-weight:bold; color:blue;"></span>.
         </div>
@@ -342,7 +360,8 @@
             window.globalSummaryData = generateSummaryData(window.globalRecords, window.globalCosts);
             renderSummary(window.globalSummaryData);
             renderMaintenanceSection();
-            renderMakFaraid(window.globalSummaryData); // NEW FUNCTION FOR SECTION 4
+            renderMakFaraid(window.globalSummaryData);
+            renderCombinedSummary(window.globalSummaryData); // NEW FUNCTION FOR SECTION 5
         }
 
         function renderMaintenanceSection() {
@@ -364,20 +383,14 @@
             document.getElementById('bakiSelenggaraDisplay').innerText = "RM " + baki.toFixed(2);
         }
 
-        // --- NEW FUNCTION: RENDER SECTION 4 ---
         function renderMakFaraid(data) {
             const tbody = document.getElementById('summaryMakFaraid');
             tbody.innerHTML = '';
-            
             data.forEach(d => {
-                // Formula: Harta Mak = (1/2 Harta Sepencarian) + (Bahagian Faraid Dia)
                 const hartaMak = d.makHalf + d.sMak;
-                
-                // Agihan jika Mak meninggal
-                const ijatShare = hartaMak * 0.5; // 2 Bahagian
-                const yatiShare = hartaMak * 0.25; // 1 Bahagian
-                const elaShare = hartaMak * 0.25; // 1 Bahagian
-
+                const ijatShare = hartaMak * 0.5;
+                const yatiShare = hartaMak * 0.25;
+                const elaShare = hartaMak * 0.25;
                 tbody.innerHTML += `<tr>
                     <td>${d.monthName}</td>
                     <td class="col-mak-total">${hartaMak.toFixed(2)}</td>
@@ -385,6 +398,46 @@
                     <td class="col-anak-mak">${yatiShare.toFixed(2)}</td>
                     <td class="col-anak-mak">${elaShare.toFixed(2)}</td>
                 </tr>`;
+            });
+        }
+
+        // --- NEW FUNCTION: RENDER SECTION 5 (GABUNGAN) ---
+        function renderCombinedSummary(data) {
+            const tbody = document.getElementById('summaryGabungan');
+            tbody.innerHTML = '';
+
+            data.forEach(d => {
+                const hartaMak = d.makHalf + d.sMak;
+                
+                // Kiraan Mak
+                const ijatFromMak = hartaMak * 0.5;
+                const yatiFromMak = hartaMak * 0.25;
+                const elaFromMak = hartaMak * 0.25;
+
+                // Array Waris untuk Loop
+                const warisList = [
+                    { nama: "Ijat", abah: d.sIjat, mak: ijatFromMak },
+                    { nama: "Yati", abah: d.sYati, mak: yatiFromMak },
+                    { nama: "Ela", abah: d.sEla, mak: elaFromMak },
+                    { nama: "Ina", abah: d.sIna, mak: 0 },
+                    { nama: "Pah", abah: d.sPah, mak: 0 },
+                    { nama: "Kila", abah: d.sKila, mak: 0 },
+                    { nama: "Ayed", abah: d.sAyed, mak: 0 }
+                ];
+
+                // Tambah Header Bulan
+                tbody.innerHTML += `<tr style="background:#eee; font-weight:bold;"><td colspan="5" style="text-align:center;">${d.monthName}</td></tr>`;
+
+                warisList.forEach(w => {
+                    const total = w.abah + w.mak;
+                    tbody.innerHTML += `<tr>
+                        <td></td>
+                        <td style="font-weight:bold;">${w.nama}</td>
+                        <td style="text-align:right;">${w.abah.toFixed(2)}</td>
+                        <td style="text-align:right;">${w.mak.toFixed(2)}</td>
+                        <td class="col-total-final" style="text-align:right;">${total.toFixed(2)}</td>
+                    </tr>`;
+                });
             });
         }
 
@@ -404,13 +457,10 @@
                 const costData = costs[monthKey] || {};
                 const manualWakAji = parseFloat(costData.wakAji) || 0; 
                 const manualBilUpah = parseFloat(costData.bilUpah) || 0; 
-                
                 const selenggara = totalMasuk * 0.20; 
-                
                 let grossAvailable = totalMasuk - manualWakAji - selenggara;
                 let fixedCost = grossAvailable < manualBilUpah ? grossAvailable : manualBilUpah; 
                 if(fixedCost < 0) fixedCost = 0;
-                
                 let bersih = grossAvailable - fixedCost;
                 if(bersih < 0) bersih = 0;
 
