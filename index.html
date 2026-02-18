@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V3.3 - Gabungan)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V3.4 - Nisbah Lengkap)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -62,6 +62,8 @@
         
         /* New Combined Summary Colors */
         .col-total-final { background-color: #2e86c1; color: white; font-weight: bold; border-left: 2px solid #000; }
+        .ratio-text { display: block; font-size: 10px; color: #555; font-style: italic; margin-top: 2px; }
+        .ratio-text-dark { display: block; font-size: 10px; color: #ddd; font-style: italic; margin-top: 2px; }
 
         .summary-box { margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; }
         .maintenance-box { background: #eaf2f8; padding: 20px; border-radius: 8px; border: 1px solid #d6eaf8; width: 100%; max-width: 500px; }
@@ -115,7 +117,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V3.3)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V3.4)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
@@ -361,7 +363,7 @@
             renderSummary(window.globalSummaryData);
             renderMaintenanceSection();
             renderMakFaraid(window.globalSummaryData);
-            renderCombinedSummary(window.globalSummaryData); // NEW FUNCTION FOR SECTION 5
+            renderCombinedSummary(window.globalSummaryData); 
         }
 
         function renderMaintenanceSection() {
@@ -401,7 +403,7 @@
             });
         }
 
-        // --- NEW FUNCTION: RENDER SECTION 5 (GABUNGAN) ---
+        // --- RENDER SECTION 5 (GABUNGAN DENGAN NISBAH) ---
         function renderCombinedSummary(data) {
             const tbody = document.getElementById('summaryGabungan');
             tbody.innerHTML = '';
@@ -414,15 +416,15 @@
                 const yatiFromMak = hartaMak * 0.25;
                 const elaFromMak = hartaMak * 0.25;
 
-                // Array Waris untuk Loop
+                // Definisi Waris Berserta Nisbah
                 const warisList = [
-                    { nama: "Ijat", abah: d.sIjat, mak: ijatFromMak },
-                    { nama: "Yati", abah: d.sYati, mak: yatiFromMak },
-                    { nama: "Ela", abah: d.sEla, mak: elaFromMak },
-                    { nama: "Ina", abah: d.sIna, mak: 0 },
-                    { nama: "Pah", abah: d.sPah, mak: 0 },
-                    { nama: "Kila", abah: d.sKila, mak: 0 },
-                    { nama: "Ayed", abah: d.sAyed, mak: 0 }
+                    { nama: "Ijat", abah: d.sIjat, mak: ijatFromMak, ratioAbah: "672/2304", ratioMak: "1/2", ratioFinal: "2024/4608" },
+                    { nama: "Yati", abah: d.sYati, mak: yatiFromMak, ratioAbah: "336/2304", ratioMak: "1/4", ratioFinal: "1012/4608" },
+                    { nama: "Ela", abah: d.sEla, mak: elaFromMak, ratioAbah: "336/2304", ratioMak: "1/4", ratioFinal: "1012/4608" },
+                    { nama: "Ina", abah: d.sIna, mak: 0, ratioAbah: "84/2304", ratioMak: "-", ratioFinal: "84/4608" },
+                    { nama: "Pah", abah: d.sPah, mak: 0, ratioAbah: "119/2304", ratioMak: "-", ratioFinal: "119/4608" },
+                    { nama: "Kila", abah: d.sKila, mak: 0, ratioAbah: "119/2304", ratioMak: "-", ratioFinal: "119/4608" },
+                    { nama: "Ayed", abah: d.sAyed, mak: 0, ratioAbah: "238/2304", ratioMak: "-", ratioFinal: "238/4608" }
                 ];
 
                 // Tambah Header Bulan
@@ -433,9 +435,18 @@
                     tbody.innerHTML += `<tr>
                         <td></td>
                         <td style="font-weight:bold;">${w.nama}</td>
-                        <td style="text-align:right;">${w.abah.toFixed(2)}</td>
-                        <td style="text-align:right;">${w.mak.toFixed(2)}</td>
-                        <td class="col-total-final" style="text-align:right;">${total.toFixed(2)}</td>
+                        <td style="text-align:right;">
+                            ${w.abah.toFixed(2)}
+                            <span class="ratio-text">(${w.ratioAbah})</span>
+                        </td>
+                        <td style="text-align:right;">
+                            ${w.mak.toFixed(2)}
+                            <span class="ratio-text">(${w.ratioMak})</span>
+                        </td>
+                        <td class="col-total-final" style="text-align:right;">
+                            ${total.toFixed(2)}
+                            <span class="ratio-text-dark">(${w.ratioFinal})</span>
+                        </td>
                     </tr>`;
                 });
             });
