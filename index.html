@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V3.4 - Nisbah Lengkap)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V3.5 - Filter Gabungan)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -26,6 +26,7 @@
         .btn-faraid-pdf { background-color: #d35400; color: white; } 
         .btn-logout { background-color: #c0392b; color: white; float: right; margin-bottom: 20px; }
         .btn-login { background-color: #4285F4; color: white; font-size: 16px; padding: 15px 30px; width: 100%; }
+        .btn-clear { background-color: #7f8c8d; color: white; padding: 8px 12px; font-size: 12px; margin: 0; }
 
         /* Tables */
         .table-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
@@ -70,13 +71,17 @@
         .maintenance-row { display: flex; justify-content: space-between; border-bottom: 1px solid #ccc; padding: 8px 0; }
         .maintenance-total { font-weight: bold; font-size: 16px; color: #2c3e50; border-top: 2px solid #000; border-bottom: none; margin-top: 10px; }
 
+        /* Control Bars */
+        .section-controls { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background: #e8f6f3; padding: 10px; border-radius: 5px; border: 1px solid #d1f2eb; margin-top: 30px; }
+        .section-controls h3 { margin: 0; border: none; padding: 0; font-size: 16px; }
+
         /* Mobile Responsive */
         @media screen and (max-width: 768px) {
             body { padding: 10px; }
             .input-container { flex-direction: column; align-items: stretch; gap: 15px; }
             .form-group input, .form-group select { width: 100% !important; box-sizing: border-box; }
-            .btn-add, .btn-export, .btn-pdf, .btn-faraid-pdf { width: 100%; padding: 15px; font-size: 16px; margin: 5px 0; }
-            #faraidControls { flex-direction: column; gap: 10px; }
+            .btn-add, .btn-export, .btn-pdf, .btn-faraid-pdf, .btn-clear { width: 100%; padding: 15px; font-size: 16px; margin: 5px 0; }
+            .section-controls { flex-direction: column; gap: 10px; align-items: stretch; text-align: center; }
             .maintenance-box { width: auto; }
         }
 
@@ -86,7 +91,7 @@
 
         /* PRINT LOGIC */
         @media print {
-            .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, #faraidControls { display: none !important; }
+            .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, .section-controls { display: none !important; }
             @page { size: landscape; margin: 10mm; } 
             body { zoom: 100%; padding: 0; background: white; }
             .table-wrapper, .summary-wrapper, .maintenance-box { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
@@ -102,8 +107,11 @@
             .slip-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12pt; border-bottom: 1px dotted #ccc; }
             .slip-total { border-top: 2px solid #000; border-bottom: 4px double #000; margin-top: 10px; padding-top: 5px; font-weight: bold; font-size: 13pt; background: #eee; -webkit-print-color-adjust: exact;}
             
+            /* Tunjukkan H3 asal jika di-print (ganti section-controls yang disorok) */
+            h3.print-only-title { display: block !important; color: black; border-bottom: 2px solid black; }
             @page { size: auto; margin: 5mm; } 
         }
+        h3.print-only-title { display: none; }
     </style>
 </head>
 <body>
@@ -117,7 +125,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V3.4)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V3.5)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
@@ -170,9 +178,10 @@
             </table>
         </div>
 
+        <h3 class="print-only-title">2. Slip Agihan Faraid</h3>
         <div id="faraidSection">
-            <div id="faraidControls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background: #e8f6f3; padding: 10px; border-radius: 5px; border: 1px solid #d1f2eb;">
-                <h3 style="margin:0; border:none; padding:0; font-size:16px;">2. Slip Agihan Faraid</h3>
+            <div class="section-controls">
+                <h3>2. Slip Agihan Faraid</h3>
                 <div style="display:flex; gap: 5px; align-items: center; flex-wrap:wrap;">
                     <label style="margin:0;">Pilih Bulan:</label>
                     <input type="month" id="slipMonthInput" style="padding: 5px;">
@@ -237,7 +246,16 @@
             </table>
         </div>
 
-        <h3>5. Rumusan Keseluruhan (Gabungan Abah + Mak)</h3>
+        <h3 class="print-only-title">5. Rumusan Keseluruhan (Gabungan Abah + Mak)</h3>
+        <div class="section-controls" style="background: #eef2f3; border-color: #ccc;">
+            <h3>5. Rumusan Keseluruhan (Gabungan Abah + Mak)</h3>
+            <div style="display:flex; gap: 5px; align-items: center; flex-wrap:wrap;">
+                <label style="margin:0; font-size:12px; font-weight:bold;">Tapis Bulan:</label>
+                <input type="month" id="filterGabunganMonth" style="padding: 5px;" onchange="window.applyGabunganFilter()">
+                <button class="btn-clear" onclick="window.clearGabunganFilter()">Papar Semua</button>
+            </div>
+        </div>
+        
         <div class="summary-wrapper">
             <table class="summary-table">
                 <thead>
@@ -288,6 +306,7 @@
 
         window.globalRecords = [];
         window.globalCosts = {}; 
+        window.globalSummaryData = []; // Assign to window for filtering
 
         window.loginGoogle = async () => {
             const provider = new GoogleAuthProvider();
@@ -363,7 +382,9 @@
             renderSummary(window.globalSummaryData);
             renderMaintenanceSection();
             renderMakFaraid(window.globalSummaryData);
-            renderCombinedSummary(window.globalSummaryData); 
+            
+            // Render Bahagian 5 mengikut Filter
+            window.applyGabunganFilter(); 
         }
 
         function renderMaintenanceSection() {
@@ -403,20 +424,41 @@
             });
         }
 
-        // --- RENDER SECTION 5 (GABUNGAN DENGAN NISBAH) ---
+        // --- FILTER FUNCTION UNTUK BAHAGIAN 5 ---
+        window.applyGabunganFilter = function() {
+            if (!window.globalSummaryData) return;
+            const selectedMonth = document.getElementById('filterGabunganMonth').value;
+            let filteredData = window.globalSummaryData;
+
+            if (selectedMonth) {
+                filteredData = window.globalSummaryData.filter(d => d.monthKey === selectedMonth);
+            }
+
+            renderCombinedSummary(filteredData);
+        }
+
+        window.clearGabunganFilter = function() {
+            document.getElementById('filterGabunganMonth').value = '';
+            window.applyGabunganFilter();
+        }
+
+        // --- RENDER SECTION 5 ---
         function renderCombinedSummary(data) {
             const tbody = document.getElementById('summaryGabungan');
             tbody.innerHTML = '';
 
+            if(data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:#555;">Tiada rekod agihan untuk bulan yang dipilih.</td></tr>`;
+                return;
+            }
+
             data.forEach(d => {
                 const hartaMak = d.makHalf + d.sMak;
                 
-                // Kiraan Mak
                 const ijatFromMak = hartaMak * 0.5;
                 const yatiFromMak = hartaMak * 0.25;
                 const elaFromMak = hartaMak * 0.25;
 
-                // Definisi Waris Berserta Nisbah
                 const warisList = [
                     { nama: "Ijat", abah: d.sIjat, mak: ijatFromMak, ratioAbah: "672/2304", ratioMak: "1/2", ratioFinal: "2024/4608" },
                     { nama: "Yati", abah: d.sYati, mak: yatiFromMak, ratioAbah: "336/2304", ratioMak: "1/4", ratioFinal: "1012/4608" },
@@ -427,7 +469,6 @@
                     { nama: "Ayed", abah: d.sAyed, mak: 0, ratioAbah: "238/2304", ratioMak: "-", ratioFinal: "238/4608" }
                 ];
 
-                // Tambah Header Bulan
                 tbody.innerHTML += `<tr style="background:#eee; font-weight:bold;"><td colspan="5" style="text-align:center;">${d.monthName}</td></tr>`;
 
                 warisList.forEach(w => {
@@ -669,6 +710,7 @@
         const yyyy = now.getFullYear();
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         document.getElementById('slipMonthInput').value = `${yyyy}-${mm}`;
+        document.getElementById('filterGabunganMonth').value = `${yyyy}-${mm}`; // Set default filter value
 
         window.toggleFeldaInput = function() {
             const cat = document.getElementById('inputCategory').value;
