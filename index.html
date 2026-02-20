@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V3.5 - Filter Gabungan)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V3.6)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -27,6 +27,7 @@
         .btn-logout { background-color: #c0392b; color: white; float: right; margin-bottom: 20px; }
         .btn-login { background-color: #4285F4; color: white; font-size: 16px; padding: 15px 30px; width: 100%; }
         .btn-clear { background-color: #7f8c8d; color: white; padding: 8px 12px; font-size: 12px; margin: 0; }
+        .btn-print-sec5 { background-color: #16a085; color: white; }
 
         /* Tables */
         .table-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
@@ -47,21 +48,14 @@
         .col-waris { background-color: #222; color: white; border: 1px solid #555; } 
 
         /* Input Key-In */
-        .input-kos { 
-            width: 80px; text-align: right; border: 1px solid #ccc; 
-            padding: 5px; border-radius: 3px; font-weight: bold; color: #c0392b;
-        }
+        .input-kos { width: 80px; text-align: right; border: 1px solid #ccc; padding: 5px; border-radius: 3px; font-weight: bold; color: #c0392b; }
         .input-kos:focus { border-color: #2980b9; outline: none; background: #eaf2f8; }
         
         .share-fraction { display: block; font-size: 9px; opacity: 0.8; margin-top: 2px; font-weight: normal; color: #ccc; }
-        
         .pic-ijat { background-color: #d4e6f1; color: #154360; font-weight: bold; border-left: 2px solid #000; } 
         .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000; }
-        
         .col-mak-total { background-color: #d1f2eb; font-weight: bold; color: #0e6251; border-right: 2px solid #000; }
         .col-anak-mak { background-color: #fff8e1; color: #795548; font-weight: bold; }
-        
-        /* New Combined Summary Colors */
         .col-total-final { background-color: #2e86c1; color: white; font-weight: bold; border-left: 2px solid #000; }
         .ratio-text { display: block; font-size: 10px; color: #555; font-style: italic; margin-top: 2px; }
         .ratio-text-dark { display: block; font-size: 10px; color: #ddd; font-style: italic; margin-top: 2px; }
@@ -80,14 +74,14 @@
             body { padding: 10px; }
             .input-container { flex-direction: column; align-items: stretch; gap: 15px; }
             .form-group input, .form-group select { width: 100% !important; box-sizing: border-box; }
-            .btn-add, .btn-export, .btn-pdf, .btn-faraid-pdf, .btn-clear { width: 100%; padding: 15px; font-size: 16px; margin: 5px 0; }
+            .btn-add, .btn-export, .btn-pdf, .btn-faraid-pdf, .btn-clear, .btn-print-sec5 { width: 100%; padding: 15px; font-size: 16px; margin: 5px 0; }
             .section-controls { flex-direction: column; gap: 10px; align-items: stretch; text-align: center; }
             .maintenance-box { width: auto; }
         }
 
         #loginContainer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ecf0f1; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
         #mainApp { display: none; } 
-        #customSlipArea { display: none; }
+        #customSlipArea, #printSec5Area { display: none; }
 
         /* PRINT LOGIC */
         @media print {
@@ -98,6 +92,7 @@
             table { min-width: auto; width: 100%; font-size: 11pt; }
             .input-kos { border: none; background: transparent; text-align: right; width: auto; padding: 0; }
             
+            /* --- MOD SLIP KHAS FARAID --- */
             body.print-slip-mode #mainApp { display: none !important; }
             body.print-slip-mode #customSlipArea { 
                 display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999;
@@ -107,7 +102,12 @@
             .slip-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12pt; border-bottom: 1px dotted #ccc; }
             .slip-total { border-top: 2px solid #000; border-bottom: 4px double #000; margin-top: 10px; padding-top: 5px; font-weight: bold; font-size: 13pt; background: #eee; -webkit-print-color-adjust: exact;}
             
-            /* Tunjukkan H3 asal jika di-print (ganti section-controls yang disorok) */
+            /* --- MOD CETAK SEC 5 SAHAJA --- */
+            body.print-sec5-mode #mainApp { display: none !important; }
+            body.print-sec5-mode #printSec5Area { 
+                display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999;
+            }
+
             h3.print-only-title { display: block !important; color: black; border-bottom: 2px solid black; }
             @page { size: auto; margin: 5mm; } 
         }
@@ -125,7 +125,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V3.5)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V3.6)</h2>
         
         <div class="input-container">
             <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
@@ -138,7 +138,6 @@
             </div>
             <div class="form-group"><label>Tarikh Resit Felda</label><input type="date" id="inputFeldaDate"></div>
             <div class="form-group"><label>Catatan</label><input type="text" id="inputDesc" placeholder="Contoh: Jualan Durian"></div>
-            <div class="form-group"><label>Lampiran</label><input type="file" id="inputFile" accept="image/*,application/pdf"></div>
             
             <div class="form-group"><label>MASUK (RM)</label><input type="number" id="inputMasuk" placeholder="0.00" oninput="toggleInput('masuk')"></div>
             <div class="form-group"><label>KELUAR (RM)</label><input type="number" id="inputKeluar" placeholder="0.00" oninput="toggleInput('keluar')"></div>
@@ -153,13 +152,13 @@
                 <thead>
                     <tr>
                         <th class="col-date">Tarikh</th><th class="col-cat">Kategori</th><th class="col-felda">Tarikh Resit<br>Felda</th><th class="col-desc">Catatan</th>
-                        <th class="col-masuk">Masuk</th><th class="col-keluar">Keluar</th><th class="col-baki">Baki</th>
-                        <th class="col-attach">Lampiran</th>
+                        <th class="col-masuk">Masuk</th><th class="col-keluar">Keluar</th><th class="col-baki">Baki Semasa</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody"><tr><td colspan="9" style="text-align:center">Sedang memuatkan data...</td></tr></tbody>
+                <tbody id="tableBody"><tr><td colspan="8" style="text-align:center">Sedang memuatkan data...</td></tr></tbody>
             </table>
+            <div style="text-align:right; font-size:11px; color:#777; padding: 5px;">*Hanya memaparkan 20 transaksi terkini.</div>
         </div>
 
         <h3>1. Ringkasan Kos (Key-In Manual)</h3>
@@ -230,7 +229,7 @@
             </div>
         </div>
 
-        <h3>4. Simulasi Faraid Harta Mak (Jika Berlaku Kematian)</h3>
+        <h3>4. Simulasi Faraid Harta Mak (Bermula Februari 2024)</h3>
         <div class="summary-wrapper">
             <table class="summary-table">
                 <thead>
@@ -253,10 +252,11 @@
                 <label style="margin:0; font-size:12px; font-weight:bold;">Tapis Bulan:</label>
                 <input type="month" id="filterGabunganMonth" style="padding: 5px;" onchange="window.applyGabunganFilter()">
                 <button class="btn-clear" onclick="window.clearGabunganFilter()">Papar Semua</button>
+                <button class="btn-print-sec5" onclick="window.printSection5()">🖨️ Cetak Rumusan</button>
             </div>
         </div>
         
-        <div class="summary-wrapper">
+        <div class="summary-wrapper" id="printTargetSec5">
             <table class="summary-table">
                 <thead>
                     <tr>
@@ -277,13 +277,14 @@
     </div>
 
     <div id="customSlipArea"></div>
+    <div id="printSec5Area"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+        // --- TEPEK CONFIG FIREBASE ANDA DI SINI ---
         const firebaseConfig = {
             apiKey: "AIzaSyAaGpKuDs8d3-n5ulueMUInoZhxSRkQXWY",
             authDomain: "myfaraid.firebaseapp.com",
@@ -296,7 +297,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
         const tablesCollection = collection(db, "transaksi_faraid");
         const costsCollection = collection(db, "kos_bulanan_faraid"); 
 
@@ -306,7 +306,7 @@
 
         window.globalRecords = [];
         window.globalCosts = {}; 
-        window.globalSummaryData = []; // Assign to window for filtering
+        window.globalSummaryData = []; 
 
         window.loginGoogle = async () => {
             const provider = new GoogleAuthProvider();
@@ -360,30 +360,40 @@
 
         function renderAll() {
             if(!window.globalRecords) return;
-            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
+            
+            // 1. Kira running balance untuk SEMUA data terlebih dahulu
             let bal = 0;
-            window.globalRecords.forEach((r) => {
+            window.globalRecords.forEach(r => {
                 bal += parseFloat(r.masuk) - parseFloat(r.keluar);
-                let attach = r.fileURL ? `<a href="${r.fileURL}" target="_blank" style="color:blue">Fail</a>` : '-';
-                tbody.innerHTML += `<tr>
-                    <td class="col-date">${r.date}</td>
-                    <td class="col-cat">${r.category}</td>
-                    <td class="col-felda">${r.feldaDate || '-'}</td>
-                    <td class="col-desc">${r.desc}</td>
-                    <td class="col-masuk">${r.masuk>0?r.masuk.toFixed(2):'-'}</td>
-                    <td class="col-keluar">${r.keluar>0?r.keluar.toFixed(2):'-'}</td>
-                    <td class="col-baki">${bal.toFixed(2)}</td>
-                    <td class="col-attach">${attach}</td>
-                    <td style="text-align:center"><button onclick="deleteRow('${r.id}')" style="background:red; color:white; font-size:10px;">X</button></td>
-                </tr>`;
+                r.currentBal = bal;
             });
+
+            // 2. Potong dan ambil 20 data terakhir sahaja untuk dipaparkan
+            const displayRecords = window.globalRecords.slice(-20);
+
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
+            
+            if(displayRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center">Tiada data direkodkan.</td></tr>`;
+            } else {
+                displayRecords.forEach((r) => {
+                    tbody.innerHTML += `<tr>
+                        <td class="col-date">${r.date}</td>
+                        <td class="col-cat">${r.category}</td>
+                        <td class="col-felda">${r.feldaDate || '-'}</td>
+                        <td class="col-desc">${r.desc}</td>
+                        <td class="col-masuk">${r.masuk>0?r.masuk.toFixed(2):'-'}</td>
+                        <td class="col-keluar">${r.keluar>0?r.keluar.toFixed(2):'-'}</td>
+                        <td class="col-baki">${r.currentBal.toFixed(2)}</td>
+                        <td style="text-align:center"><button onclick="deleteRow('${r.id}')" style="background:red; color:white; font-size:10px;">X</button></td>
+                    </tr>`;
+                });
+            }
 
             window.globalSummaryData = generateSummaryData(window.globalRecords, window.globalCosts);
             renderSummary(window.globalSummaryData);
             renderMaintenanceSection();
             renderMakFaraid(window.globalSummaryData);
-            
-            // Render Bahagian 5 mengikut Filter
             window.applyGabunganFilter(); 
         }
 
@@ -410,6 +420,9 @@
             const tbody = document.getElementById('summaryMakFaraid');
             tbody.innerHTML = '';
             data.forEach(d => {
+                // PINDAAN: Hanya paparkan bermula Februari onwards (2024-02 ke atas)
+                if(d.monthKey < '2024-02') return;
+
                 const hartaMak = d.makHalf + d.sMak;
                 const ijatShare = hartaMak * 0.5;
                 const yatiShare = hartaMak * 0.25;
@@ -424,7 +437,6 @@
             });
         }
 
-        // --- FILTER FUNCTION UNTUK BAHAGIAN 5 ---
         window.applyGabunganFilter = function() {
             if (!window.globalSummaryData) return;
             const selectedMonth = document.getElementById('filterGabunganMonth').value;
@@ -442,7 +454,6 @@
             window.applyGabunganFilter();
         }
 
-        // --- RENDER SECTION 5 ---
         function renderCombinedSummary(data) {
             const tbody = document.getElementById('summaryGabungan');
             tbody.innerHTML = '';
@@ -491,6 +502,37 @@
                     </tr>`;
                 });
             });
+        }
+
+        // --- NEW FUNCTION: CETAK BAHAGIAN 5 ---
+        window.printSection5 = function() {
+            const area = document.getElementById('printSec5Area');
+            const targetContent = document.getElementById('printTargetSec5').innerHTML;
+            const selectedMonth = document.getElementById('filterGabunganMonth').value;
+            
+            let title = "Rumusan Keseluruhan (Gabungan Abah + Mak)";
+            if (selectedMonth) {
+                try {
+                    let d = new Date(selectedMonth + "-01");
+                    title += `<br><span style="font-size:12pt; font-weight:normal;">Bulan: ${d.toLocaleDateString('ms-MY', { year: 'numeric', month: 'long' })}</span>`;
+                } catch(e) {}
+            }
+
+            area.innerHTML = `
+                <div style="padding: 20px;">
+                    <h2 style="text-align:center; color:black; border-bottom:2px solid black; padding-bottom:10px;">${title}</h2>
+                    <div class="summary-wrapper">
+                        ${targetContent}
+                    </div>
+                    <div style="margin-top:20px; text-align:center; font-size:10px; color:#555;">*Dicetak pada: ${new Date().toLocaleString()}</div>
+                </div>
+            `;
+
+            document.body.classList.add('print-sec5-mode');
+            setTimeout(function() {
+                window.print();
+                setTimeout(function() { document.body.classList.remove('print-sec5-mode'); }, 1000);
+            }, 500);
         }
 
         function generateSummaryData(records, costs) {
@@ -616,47 +658,36 @@
 
         window.addData = async function() {
             const btn = document.querySelector('.btn-add');
-            btn.innerText = "Uploading..."; btn.disabled = true;
+            btn.innerText = "Menyimpan..."; btn.disabled = true;
 
             const date = document.getElementById('inputDate').value;
             const category = document.getElementById('inputCategory').value;
             const feldaDate = document.getElementById('inputFeldaDate').value;
             const desc = document.getElementById('inputDesc').value;
-            const fileInput = document.getElementById('inputFile');
             let masuk = parseFloat(document.getElementById('inputMasuk').value) || 0;
             let keluar = parseFloat(document.getElementById('inputKeluar').value) || 0;
 
             if (!date || (masuk === 0 && keluar === 0)) {
-                alert("Isi Tarikh & Amaun."); btn.innerText = "+ Tambah"; btn.disabled = false; return;
+                alert("Sila isi Tarikh & Amaun."); btn.innerText = "+ Tambah Data"; btn.disabled = false; return;
             }
 
             try {
-                let fileURL = "";
-                if (fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    const storageRef = ref(storage, 'lampiran/' + Date.now() + "_" + file.name);
-                    await uploadBytes(storageRef, file);
-                    fileURL = await getDownloadURL(storageRef);
-                }
-
                 await addDoc(tablesCollection, {
                     timestamp: Date.now(),
                     date, category, feldaDate, desc, masuk, keluar,
-                    fileURL: fileURL,
                     createdBy: auth.currentUser.email
                 });
                 
                 document.getElementById('inputDesc').value = '';
                 document.getElementById('inputMasuk').value = '';
                 document.getElementById('inputKeluar').value = '';
-                document.getElementById('inputFile').value = '';
-                alert("Berjaya!");
+                alert("Berjaya disimpan!");
             } catch (e) { console.error(e); alert("Ralat: " + e.message); }
-            btn.innerText = "+ Tambah"; btn.disabled = false;
+            btn.innerText = "+ Tambah Data"; btn.disabled = false;
         }
 
         window.deleteRow = async function(id) {
-            if(confirm("Padam rekod?")) await deleteDoc(doc(db, "transaksi_faraid", id));
+            if(confirm("Padam rekod ini?")) await deleteDoc(doc(db, "transaksi_faraid", id));
         }
 
         window.printCustomSlip = function() {
@@ -710,7 +741,7 @@
         const yyyy = now.getFullYear();
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         document.getElementById('slipMonthInput').value = `${yyyy}-${mm}`;
-        document.getElementById('filterGabunganMonth').value = `${yyyy}-${mm}`; // Set default filter value
+        document.getElementById('filterGabunganMonth').value = `${yyyy}-${mm}`; 
 
         window.toggleFeldaInput = function() {
             const cat = document.getElementById('inputCategory').value;
@@ -728,12 +759,12 @@
             if(!window.globalRecords) { alert("Tiada data."); return; }
             let xml = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="sHeader"><Font ss:Bold="1"/></Style></Styles>';
             xml += '<Worksheet ss:Name="Transaksi"><Table><Row>';
-            ['Tarikh', 'Kategori', 'Tarikh Felda', 'Catatan', 'Masuk', 'Keluar', 'Baki', 'Link Fail'].forEach(h => xml += `<Cell ss:StyleID="sHeader"><Data ss:Type="String">${h}</Data></Cell>`);
+            ['Tarikh', 'Kategori', 'Tarikh Felda', 'Catatan', 'Masuk', 'Keluar', 'Baki'].forEach(h => xml += `<Cell ss:StyleID="sHeader"><Data ss:Type="String">${h}</Data></Cell>`);
             xml += '</Row>';
             let bal = 0;
             window.globalRecords.forEach(r => {
                 bal += parseFloat(r.masuk) - parseFloat(r.keluar);
-                xml += `<Row><Cell><Data ss:Type="String">${r.date}</Data></Cell><Cell><Data ss:Type="String">${r.category}</Data></Cell><Cell><Data ss:Type="String">${r.feldaDate||''}</Data></Cell><Cell><Data ss:Type="String">${r.desc}</Data></Cell><Cell><Data ss:Type="Number">${r.masuk}</Data></Cell><Cell><Data ss:Type="Number">${r.keluar}</Data></Cell><Cell><Data ss:Type="Number">${bal}</Data></Cell><Cell><Data ss:Type="String">${r.fileURL||''}</Data></Cell></Row>`;
+                xml += `<Row><Cell><Data ss:Type="String">${r.date}</Data></Cell><Cell><Data ss:Type="String">${r.category}</Data></Cell><Cell><Data ss:Type="String">${r.feldaDate||''}</Data></Cell><Cell><Data ss:Type="String">${r.desc}</Data></Cell><Cell><Data ss:Type="Number">${r.masuk}</Data></Cell><Cell><Data ss:Type="Number">${r.keluar}</Data></Cell><Cell><Data ss:Type="Number">${bal}</Data></Cell></Row>`;
             });
             xml += '</Table></Worksheet>';
             xml += '</Workbook>';
