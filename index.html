@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V3.6)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V4.1)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -12,25 +12,29 @@
         h3 { color: #2c3e50; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px; font-size: 16px;}
         
         /* Input & Forms */
-        .input-container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
+        .input-container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .data-entry-fields { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+        .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 15px;}
         .form-group { display: flex; flex-direction: column; } 
         label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
         input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
         
         /* Buttons */
-        button { padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 5px; transition: 0.2s; font-size: 14px;}
+        button { padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px;}
         button:hover { opacity: 0.9; }
         .btn-add { background-color: #27ae60; color: white; } 
         .btn-export { background-color: #2e86c1; color: white; } 
         .btn-pdf { background-color: #8e44ad; color: white; }
         .btn-faraid-pdf { background-color: #d35400; color: white; } 
         .btn-logout { background-color: #c0392b; color: white; float: right; margin-bottom: 20px; }
-        .btn-login { background-color: #4285F4; color: white; font-size: 16px; padding: 15px 30px; width: 100%; }
+        .btn-login { background-color: #4285F4; color: white; font-size: 16px; padding: 15px 30px; width: 100%; margin-bottom: 10px;}
+        .btn-login-manual { background-color: #27ae60; color: white; font-size: 16px; padding: 15px 30px; width: 100%; }
         .btn-clear { background-color: #7f8c8d; color: white; padding: 8px 12px; font-size: 12px; margin: 0; }
-        .btn-print-sec5 { background-color: #16a085; color: white; }
+        .btn-page { background-color: #34495e; color: white; padding: 8px 15px; font-size: 12px; border-radius: 20px; }
+        .btn-page:disabled { background-color: #bdc3c7; cursor: not-allowed; }
 
         /* Tables */
-        .table-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
+        .table-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 10px;}
         table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; } 
         th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
         th { background-color: #2c3e50; color: white; text-align: center; white-space: nowrap; position: sticky; top: 0; }
@@ -54,9 +58,11 @@
         .share-fraction { display: block; font-size: 9px; opacity: 0.8; margin-top: 2px; font-weight: normal; color: #ccc; }
         .pic-ijat { background-color: #d4e6f1; color: #154360; font-weight: bold; border-left: 2px solid #000; } 
         .pic-ena { background-color: #fadbd8; color: #78281f; font-weight: bold; border-left: 2px solid #000; }
+        
         .col-mak-total { background-color: #d1f2eb; font-weight: bold; color: #0e6251; border-right: 2px solid #000; }
         .col-anak-mak { background-color: #fff8e1; color: #795548; font-weight: bold; }
         .col-total-final { background-color: #2e86c1; color: white; font-weight: bold; border-left: 2px solid #000; }
+        
         .ratio-text { display: block; font-size: 10px; color: #555; font-style: italic; margin-top: 2px; }
         .ratio-text-dark { display: block; font-size: 10px; color: #ddd; font-style: italic; margin-top: 2px; }
 
@@ -68,31 +74,35 @@
         /* Control Bars */
         .section-controls { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background: #e8f6f3; padding: 10px; border-radius: 5px; border: 1px solid #d1f2eb; margin-top: 30px; }
         .section-controls h3 { margin: 0; border: none; padding: 0; font-size: 16px; }
+        #paginationControls { text-align: center; margin-bottom: 30px; }
 
         /* Mobile Responsive */
         @media screen and (max-width: 768px) {
             body { padding: 10px; }
-            .input-container { flex-direction: column; align-items: stretch; gap: 15px; }
+            .data-entry-fields { flex-direction: column; align-items: stretch; }
+            .action-buttons { flex-direction: column; align-items: stretch; }
             .form-group input, .form-group select { width: 100% !important; box-sizing: border-box; }
-            .btn-add, .btn-export, .btn-pdf, .btn-faraid-pdf, .btn-clear, .btn-print-sec5 { width: 100%; padding: 15px; font-size: 16px; margin: 5px 0; }
+            .btn-add, .btn-export, .btn-pdf, .btn-faraid-pdf, .btn-clear { width: 100%; padding: 15px; font-size: 16px; margin: 5px 0; }
             .section-controls { flex-direction: column; gap: 10px; align-items: stretch; text-align: center; }
             .maintenance-box { width: auto; }
+            .login-box { width: 90% !important; }
         }
 
         #loginContainer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ecf0f1; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        .login-box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); width: 350px; text-align: center; }
         #mainApp { display: none; } 
-        #customSlipArea, #printSec5Area { display: none; }
+        #customSlipArea { display: none; }
 
         /* PRINT LOGIC */
         @media print {
-            .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, .section-controls { display: none !important; }
+            .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, .section-controls, #paginationControls { display: none !important; }
             @page { size: landscape; margin: 10mm; } 
             body { zoom: 100%; padding: 0; background: white; }
             .table-wrapper, .summary-wrapper, .maintenance-box { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
             table { min-width: auto; width: 100%; font-size: 11pt; }
             .input-kos { border: none; background: transparent; text-align: right; width: auto; padding: 0; }
             
-            /* --- MOD SLIP KHAS FARAID --- */
+            /* SLIP MODE */
             body.print-slip-mode #mainApp { display: none !important; }
             body.print-slip-mode #customSlipArea { 
                 display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999;
@@ -102,11 +112,10 @@
             .slip-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12pt; border-bottom: 1px dotted #ccc; }
             .slip-total { border-top: 2px solid #000; border-bottom: 4px double #000; margin-top: 10px; padding-top: 5px; font-weight: bold; font-size: 13pt; background: #eee; -webkit-print-color-adjust: exact;}
             
-            /* --- MOD CETAK SEC 5 SAHAJA --- */
-            body.print-sec5-mode #mainApp { display: none !important; }
-            body.print-sec5-mode #printSec5Area { 
-                display: block !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999;
-            }
+            /* SEC 5 MODE */
+            body.print-sec5-mode * { visibility: hidden; }
+            body.print-sec5-mode #section5-container, body.print-sec5-mode #section5-container * { visibility: visible; }
+            body.print-sec5-mode #section5-container { position: absolute; left: 0; top: 0; width: 100%; }
 
             h3.print-only-title { display: block !important; color: black; border-bottom: 2px solid black; }
             @page { size: auto; margin: 5mm; } 
@@ -117,34 +126,49 @@
 <body>
 
     <div id="loginContainer">
-        <h2 style="margin-bottom: 20px;">Sistem Faraid Keluarga</h2>
-        <p style="margin-bottom: 30px; color: #666; text-align: center;">Sila login menggunakan Google.<br>Pastikan internet laju.</p>
-        <button class="btn-login" onclick="window.loginGoogle()">🔐 Login Google</button>
-        <p id="loginMsg" style="color: red; margin-top: 15px; text-align: center;"></p>
+        <div class="login-box">
+            <h2 style="margin-bottom: 20px; border:none;">Sistem Faraid Keluarga</h2>
+            
+            <button class="btn-login" onclick="window.loginGoogle()">🔐 Login Admin (Google)</button>
+            
+            <div style="margin: 25px 0; border-bottom: 1px dashed #ccc; position: relative;">
+                <span style="background: white; padding: 0 10px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #888;">ATAU PENGGUNA (VIEW ONLY)</span>
+            </div>
+            
+            <input type="text" id="manualUsername" placeholder="ID Pengguna (cth: yati)" style="width: 90%; margin-bottom: 10px; padding: 10px; box-sizing: border-box;">
+            <input type="password" id="manualPassword" placeholder="Kata Laluan" style="width: 90%; margin-bottom: 15px; padding: 10px; box-sizing: border-box;">
+            <button class="btn-login-manual" onclick="window.loginManual()">Masuk</button>
+            
+            <p id="loginMsg" style="color: red; margin-top: 15px; font-size: 13px;"></p>
+        </div>
     </div>
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V3.6)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V4.1)</h2>
         
         <div class="input-container">
-            <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
-            <div class="form-group"><label>Kategori</label>
-                <select id="inputCategory" onchange="toggleFeldaInput()">
-                    <option value="Hasil Kebun">Hasil Kebun</option>
-                    <option value="Selenggara">Selenggara</option>
-                    <option value="Lain-lain">Lain-lain</option>
-                </select>
+            <div class="data-entry-fields" id="dataEntryFields">
+                <div class="form-group"><label>Tarikh</label><input type="date" id="inputDate"></div>
+                <div class="form-group"><label>Kategori</label>
+                    <select id="inputCategory" onchange="toggleFeldaInput()">
+                        <option value="Hasil Kebun">Hasil Kebun</option>
+                        <option value="Selenggara">Selenggara</option>
+                        <option value="Lain-lain">Lain-lain</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Tarikh Resit Felda</label><input type="date" id="inputFeldaDate"></div>
+                <div class="form-group"><label>Catatan</label><input type="text" id="inputDesc" placeholder="Contoh: Jualan Durian"></div>
+                
+                <div class="form-group"><label>MASUK (RM)</label><input type="number" id="inputMasuk" placeholder="0.00" oninput="toggleInput('masuk')"></div>
+                <div class="form-group"><label>KELUAR (RM)</label><input type="number" id="inputKeluar" placeholder="0.00" oninput="toggleInput('keluar')"></div>
             </div>
-            <div class="form-group"><label>Tarikh Resit Felda</label><input type="date" id="inputFeldaDate"></div>
-            <div class="form-group"><label>Catatan</label><input type="text" id="inputDesc" placeholder="Contoh: Jualan Durian"></div>
             
-            <div class="form-group"><label>MASUK (RM)</label><input type="number" id="inputMasuk" placeholder="0.00" oninput="toggleInput('masuk')"></div>
-            <div class="form-group"><label>KELUAR (RM)</label><input type="number" id="inputKeluar" placeholder="0.00" oninput="toggleInput('keluar')"></div>
-            
-            <button class="btn-add" onclick="window.addData()">+ Tambah Data</button>
-            <button class="btn-export" onclick="downloadExcelXML()">Download Excel</button>
-            <button class="btn-pdf" onclick="window.print()">🖨️ Cetak Semua Rekod</button>
+            <div class="action-buttons">
+                <button class="btn-add" id="btnAddRecord" onclick="window.addData()">+ Tambah Data</button>
+                <button class="btn-export" onclick="downloadExcelXML()">Download Excel</button>
+                <button class="btn-pdf" onclick="window.print()">🖨️ Cetak Semua Laporan</button>
+            </div>
         </div>
 
         <div class="table-wrapper">
@@ -153,23 +177,28 @@
                     <tr>
                         <th class="col-date">Tarikh</th><th class="col-cat">Kategori</th><th class="col-felda">Tarikh Resit<br>Felda</th><th class="col-desc">Catatan</th>
                         <th class="col-masuk">Masuk</th><th class="col-keluar">Keluar</th><th class="col-baki">Baki Semasa</th>
-                        <th>Action</th>
+                        <th id="actionHeader">Action</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"><tr><td colspan="8" style="text-align:center">Sedang memuatkan data...</td></tr></tbody>
             </table>
-            <div style="text-align:right; font-size:11px; color:#777; padding: 5px;">*Hanya memaparkan 20 transaksi terkini.</div>
+        </div>
+        
+        <div id="paginationControls">
+            <button class="btn-page" id="btnPrevPage" onclick="changePage(-1)">⬅️ Sebelumnya (Lama)</button>
+            <span style="margin: 0 15px; font-weight: bold; font-size:14px;">Muka <span id="pageInfo">1 / 1</span></span>
+            <button class="btn-page" id="btnNextPage" onclick="changePage(1)">Seterusnya (Baru) ➡️</button>
         </div>
 
-        <h3>1. Ringkasan Kos (Key-In Manual)</h3>
+        <h3>1. Ringkasan Kos</h3>
         <div class="summary-wrapper">
             <table class="summary-table">
                 <thead>
-                    <tr><th rowspan="2">Bulan</th><th rowspan="2" class="col-sum-masuk">Jumlah Masuk</th><th colspan="4" style="background:#555">Tolakan Kos (Manual)</th><th rowspan="2" class="col-pusaka">Mak (1/2)</th><th rowspan="2" class="col-pusaka">Pusaka (1/2)</th></tr>
+                    <tr><th rowspan="2">Bulan</th><th rowspan="2" class="col-sum-masuk">Jumlah Masuk</th><th colspan="4" style="background:#555">Tolakan Kos</th><th rowspan="2" class="col-pusaka">Mak (1/2)</th><th rowspan="2" class="col-pusaka">Pusaka (1/2)</th></tr>
                     <tr>
-                        <th class="col-kos">Wak Aji (Key In)</th>
+                        <th class="col-kos">Wak Aji</th>
                         <th class="col-kos">20% Selenggara</th>
-                        <th class="col-kos">Bil / Upah (Key In)</th>
+                        <th class="col-kos">Bil / Upah</th>
                         <th class="col-clean">Bersih</th>
                     </tr>
                 </thead>
@@ -229,46 +258,59 @@
             </div>
         </div>
 
-        <h3>4. Simulasi Faraid Harta Mak (Bermula Februari 2024)</h3>
-        <div class="summary-wrapper">
-            <table class="summary-table">
-                <thead>
-                    <tr>
-                        <th class="col-date">Bulan</th>
-                        <th class="col-mak-total">Harta Mak (RM)<br><span style="font-size:10px; font-weight:normal">(1/2 Harta + 400/2304)</span></th>
-                        <th class="col-anak-mak">Ijat (1/2)</th>
-                        <th class="col-anak-mak">Yati (1/4)</th>
-                        <th class="col-anak-mak">Ela (1/4)</th>
-                    </tr>
-                </thead>
-                <tbody id="summaryMakFaraid"></tbody>
-            </table>
-        </div>
+        <h3 class="print-only-title">4. Simulasi Faraid Harta Mak</h3>
+        <div id="makFaraidSection">
+            <div class="section-controls">
+                <h3>4. Simulasi Faraid Harta Mak (Mula Feb 2026)</h3>
+                <div style="display:flex; gap: 5px; align-items: center; flex-wrap:wrap;">
+                    <label style="margin:0;">Pilih Bulan:</label>
+                    <input type="month" id="slipMonthInputMak" style="padding: 5px;">
+                    <button class="btn-faraid-pdf" style="background-color:#9b59b6;" onclick="printMakSlip()">📄 Cetak Slip Mak</button>
+                </div>
+            </div>
 
-        <h3 class="print-only-title">5. Rumusan Keseluruhan (Gabungan Abah + Mak)</h3>
-        <div class="section-controls" style="background: #eef2f3; border-color: #ccc;">
-            <h3>5. Rumusan Keseluruhan (Gabungan Abah + Mak)</h3>
-            <div style="display:flex; gap: 5px; align-items: center; flex-wrap:wrap;">
-                <label style="margin:0; font-size:12px; font-weight:bold;">Tapis Bulan:</label>
-                <input type="month" id="filterGabunganMonth" style="padding: 5px;" onchange="window.applyGabunganFilter()">
-                <button class="btn-clear" onclick="window.clearGabunganFilter()">Papar Semua</button>
-                <button class="btn-print-sec5" onclick="window.printSection5()">🖨️ Cetak Rumusan</button>
+            <div class="summary-wrapper">
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th class="col-date">Bulan</th>
+                            <th class="col-mak-total">Harta Mak (RM)<br><span style="font-size:10px; font-weight:normal">(1/2 Harta + 400/2304)</span></th>
+                            <th class="col-anak-mak">Ijat (1/2)</th>
+                            <th class="col-anak-mak">Yati (1/4)</th>
+                            <th class="col-anak-mak">Ela (1/4)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryMakFaraid"></tbody>
+                </table>
             </div>
         </div>
-        
-        <div class="summary-wrapper" id="printTargetSec5">
-            <table class="summary-table">
-                <thead>
-                    <tr>
-                        <th class="col-date">Bulan</th>
-                        <th class="col-waris">Nama Waris</th>
-                        <th class="col-kos">Dari Arwah Abah (RM)</th>
-                        <th class="col-kos">Dari Arwah Mak (RM)</th>
-                        <th class="col-total-final">JUMLAH BESAR (RM)</th>
-                    </tr>
-                </thead>
-                <tbody id="summaryGabungan"></tbody>
-            </table>
+
+        <div id="section5-container">
+            <h3 class="print-only-title">5. Rumusan Keseluruhan (Gabungan Abah + Mak)</h3>
+            <div class="section-controls" style="background: #eef2f3; border-color: #ccc;">
+                <h3>5. Rumusan Keseluruhan (Gabungan)</h3>
+                <div style="display:flex; gap: 5px; align-items: center; flex-wrap:wrap;">
+                    <label style="margin:0; font-size:12px; font-weight:bold;">Tapis Bulan:</label>
+                    <input type="month" id="filterGabunganMonth" style="padding: 5px;" onchange="window.applyGabunganFilter()">
+                    <button class="btn-clear" onclick="window.clearGabunganFilter()">Papar Semua</button>
+                    <button class="btn-pdf" style="margin-left:5px; background-color:#16a085;" onclick="window.printSection5()">🖨️ Cetak</button>
+                </div>
+            </div>
+            
+            <div class="summary-wrapper">
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th class="col-date">Bulan</th>
+                            <th class="col-waris">Nama Waris</th>
+                            <th class="col-kos">Dari Arwah Abah (RM)</th>
+                            <th class="col-kos">Dari Arwah Mak (RM)</th>
+                            <th class="col-total-final">JUMLAH BESAR (RM)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryGabungan"></tbody>
+                </table>
+            </div>
         </div>
 
         <div class="summary-box">
@@ -277,7 +319,6 @@
     </div>
 
     <div id="customSlipArea"></div>
-    <div id="printSec5Area"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -289,7 +330,6 @@
             apiKey: "AIzaSyAaGpKuDs8d3-n5ulueMUInoZhxSRkQXWY",
             authDomain: "myfaraid.firebaseapp.com",
             projectId: "myfaraid",
-            storageBucket: "myfaraid.firebasestorage.app",
             messagingSenderId: "1077346668678",
             appId: "1:1077346668678:web:d85d5dde3dc9c743f10107"
         };
@@ -307,7 +347,27 @@
         window.globalRecords = [];
         window.globalCosts = {}; 
         window.globalSummaryData = []; 
+        window.currentUserRole = null; // 'admin' atau 'viewer'
+        
+        let currentPage = 1;
+        const itemsPerPage = 20;
 
+        // --- ROLE RESTRICTIONS LOGIC ---
+        function applyRoleRestrictions() {
+            if (window.currentUserRole === 'viewer') {
+                // Sembunyikan fungsi input & butang padam
+                document.getElementById('dataEntryFields').style.display = 'none';
+                document.getElementById('btnAddRecord').style.display = 'none';
+                document.getElementById('actionHeader').style.display = 'none';
+            } else {
+                // Tunjuk untuk Admin
+                document.getElementById('dataEntryFields').style.display = 'flex';
+                document.getElementById('btnAddRecord').style.display = 'inline-block';
+                document.getElementById('actionHeader').style.display = 'table-cell';
+            }
+        }
+
+        // --- GOOGLE AUTH (ADMIN) ---
         window.loginGoogle = async () => {
             const provider = new GoogleAuthProvider();
             try {
@@ -319,11 +379,29 @@
             } catch (error) { console.error(error); alert("Login Error: " + error.message); }
         };
 
+        // --- MANUAL AUTH (VIEWER) ---
+        window.loginManual = function() {
+            const user = document.getElementById('manualUsername').value.trim().toLowerCase();
+            const pass = document.getElementById('manualPassword').value;
+
+            if ((user === 'yati' || user === 'ijat') && pass === '90909090') {
+                window.currentUserRole = 'viewer';
+                document.getElementById('loginContainer').style.display = "none";
+                document.getElementById('mainApp').style.display = "block";
+                document.getElementById('userEmailDisplay').innerText = user.toUpperCase() + " (Mod View Only)";
+                applyRoleRestrictions();
+                initApp(); 
+            } else {
+                document.getElementById('loginMsg').innerText = "ID atau Kata Laluan Salah!";
+            }
+        }
+
         window.logout = async () => {
-            if(confirm("Log Keluar?")) {
+            if(confirm("Pasti untuk Log Keluar?")) {
                 if(unsubscribeSnapshot) unsubscribeSnapshot();
                 if(unsubscribeCosts) unsubscribeCosts();
-                await signOut(auth);
+                if(auth.currentUser) await signOut(auth); // Sign out google if active
+                window.location.reload(); // Refresh to clear manual state
             }
         };
 
@@ -331,11 +409,14 @@
             const loginDiv = document.getElementById("loginContainer");
             const appDiv = document.getElementById("mainApp");
             if (user && allowedEmails.includes(user.email)) {
+                window.currentUserRole = 'admin';
                 loginDiv.style.display = "none";
                 appDiv.style.display = "block";
-                document.getElementById('userEmailDisplay').innerText = user.email;
+                document.getElementById('userEmailDisplay').innerText = user.email + " (Admin)";
+                applyRoleRestrictions();
                 initApp();
-            } else {
+            } else if (!window.currentUserRole) {
+                // Jika tiada google & tiada manual
                 loginDiv.style.display = "flex";
                 appDiv.style.display = "none";
             }
@@ -348,7 +429,7 @@
                 snapshot.forEach((doc) => { records.push({ id: doc.id, ...doc.data() }); });
                 window.globalRecords = records;
                 renderAll(); 
-            }, (error) => { alert("Gagal membaca data transaksi."); });
+            }, (error) => { alert("Gagal baca data. Sila pastikan Firestore Rules membenarkan public read."); console.error(error); });
 
             unsubscribeCosts = onSnapshot(costsCollection, (snapshot) => {
                 let costs = {};
@@ -358,37 +439,58 @@
             });
         }
 
-        function renderAll() {
+        // --- PAGINATION LOGIC ---
+        window.changePage = function(dir) {
+            currentPage += dir;
+            renderMainTableOnly();
+        }
+
+        function renderMainTableOnly() {
             if(!window.globalRecords) return;
-            
-            // 1. Kira running balance untuk SEMUA data terlebih dahulu
-            let bal = 0;
-            window.globalRecords.forEach(r => {
-                bal += parseFloat(r.masuk) - parseFloat(r.keluar);
-                r.currentBal = bal;
-            });
-
-            // 2. Potong dan ambil 20 data terakhir sahaja untuk dipaparkan
-            const displayRecords = window.globalRecords.slice(-20);
-
             const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
             
-            if(displayRecords.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center">Tiada data direkodkan.</td></tr>`;
-            } else {
-                displayRecords.forEach((r) => {
-                    tbody.innerHTML += `<tr>
-                        <td class="col-date">${r.date}</td>
-                        <td class="col-cat">${r.category}</td>
-                        <td class="col-felda">${r.feldaDate || '-'}</td>
-                        <td class="col-desc">${r.desc}</td>
-                        <td class="col-masuk">${r.masuk>0?r.masuk.toFixed(2):'-'}</td>
-                        <td class="col-keluar">${r.keluar>0?r.keluar.toFixed(2):'-'}</td>
-                        <td class="col-baki">${r.currentBal.toFixed(2)}</td>
-                        <td style="text-align:center"><button onclick="deleteRow('${r.id}')" style="background:red; color:white; font-size:10px;">X</button></td>
-                    </tr>`;
-                });
-            }
+            let bal = 0;
+            let recordsWithBal = window.globalRecords.map(r => {
+                bal += parseFloat(r.masuk) - parseFloat(r.keluar);
+                return { ...r, runningBalance: bal };
+            });
+
+            recordsWithBal.reverse();
+
+            const totalPages = Math.ceil(recordsWithBal.length / itemsPerPage) || 1;
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            
+            document.getElementById('pageInfo').innerText = `${currentPage} / ${totalPages}`;
+            document.getElementById('btnPrevPage').disabled = (currentPage === totalPages); 
+            document.getElementById('btnNextPage').disabled = (currentPage === 1);
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginated = recordsWithBal.slice(start, end);
+
+            paginated.forEach((r) => {
+                let actionCol = '';
+                if (window.currentUserRole === 'admin') {
+                    actionCol = `<td style="text-align:center"><button onclick="deleteRow('${r.id}')" style="background:red; color:white; font-size:10px; padding:3px 6px;">X</button></td>`;
+                }
+
+                tbody.innerHTML += `<tr>
+                    <td class="col-date">${r.date}</td>
+                    <td class="col-cat">${r.category}</td>
+                    <td class="col-felda">${r.feldaDate || '-'}</td>
+                    <td class="col-desc">${r.desc}</td>
+                    <td class="col-masuk">${r.masuk>0?parseFloat(r.masuk).toFixed(2):'-'}</td>
+                    <td class="col-keluar">${r.keluar>0?parseFloat(r.keluar).toFixed(2):'-'}</td>
+                    <td class="col-baki">${r.runningBalance.toFixed(2)}</td>
+                    ${actionCol}
+                </tr>`;
+            });
+        }
+
+        function renderAll() {
+            currentPage = 1; 
+            renderMainTableOnly();
 
             window.globalSummaryData = generateSummaryData(window.globalRecords, window.globalCosts);
             renderSummary(window.globalSummaryData);
@@ -419,10 +521,15 @@
         function renderMakFaraid(data) {
             const tbody = document.getElementById('summaryMakFaraid');
             tbody.innerHTML = '';
-            data.forEach(d => {
-                // PINDAAN: Hanya paparkan bermula Februari onwards (2024-02 ke atas)
-                if(d.monthKey < '2024-02') return;
+            
+            const filteredData = data.filter(d => d.monthKey >= "2026-02");
 
+            if(filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Tiada data bermula Februari 2026.</td></tr>`;
+                return;
+            }
+
+            filteredData.forEach(d => {
                 const hartaMak = d.makHalf + d.sMak;
                 const ijatShare = hartaMak * 0.5;
                 const yatiShare = hartaMak * 0.25;
@@ -445,7 +552,6 @@
             if (selectedMonth) {
                 filteredData = window.globalSummaryData.filter(d => d.monthKey === selectedMonth);
             }
-
             renderCombinedSummary(filteredData);
         }
 
@@ -459,16 +565,15 @@
             tbody.innerHTML = '';
 
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:#555;">Tiada rekod agihan untuk bulan yang dipilih.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:#555;">Tiada rekod.</td></tr>`;
                 return;
             }
 
             data.forEach(d => {
                 const hartaMak = d.makHalf + d.sMak;
-                
-                const ijatFromMak = hartaMak * 0.5;
-                const yatiFromMak = hartaMak * 0.25;
-                const elaFromMak = hartaMak * 0.25;
+                const ijatFromMak = d.monthKey >= "2026-02" ? hartaMak * 0.5 : 0;
+                const yatiFromMak = d.monthKey >= "2026-02" ? hartaMak * 0.25 : 0;
+                const elaFromMak =  d.monthKey >= "2026-02" ? hartaMak * 0.25 : 0;
 
                 const warisList = [
                     { nama: "Ijat", abah: d.sIjat, mak: ijatFromMak, ratioAbah: "672/2304", ratioMak: "1/2", ratioFinal: "2024/4608" },
@@ -502,37 +607,6 @@
                     </tr>`;
                 });
             });
-        }
-
-        // --- NEW FUNCTION: CETAK BAHAGIAN 5 ---
-        window.printSection5 = function() {
-            const area = document.getElementById('printSec5Area');
-            const targetContent = document.getElementById('printTargetSec5').innerHTML;
-            const selectedMonth = document.getElementById('filterGabunganMonth').value;
-            
-            let title = "Rumusan Keseluruhan (Gabungan Abah + Mak)";
-            if (selectedMonth) {
-                try {
-                    let d = new Date(selectedMonth + "-01");
-                    title += `<br><span style="font-size:12pt; font-weight:normal;">Bulan: ${d.toLocaleDateString('ms-MY', { year: 'numeric', month: 'long' })}</span>`;
-                } catch(e) {}
-            }
-
-            area.innerHTML = `
-                <div style="padding: 20px;">
-                    <h2 style="text-align:center; color:black; border-bottom:2px solid black; padding-bottom:10px;">${title}</h2>
-                    <div class="summary-wrapper">
-                        ${targetContent}
-                    </div>
-                    <div style="margin-top:20px; text-align:center; font-size:10px; color:#555;">*Dicetak pada: ${new Date().toLocaleString()}</div>
-                </div>
-            `;
-
-            document.body.classList.add('print-sec5-mode');
-            setTimeout(function() {
-                window.print();
-                setTimeout(function() { document.body.classList.remove('print-sec5-mode'); }, 1000);
-            }, 500);
         }
 
         function generateSummaryData(records, costs) {
@@ -605,18 +679,20 @@
                 tMak += d.makHalf;
                 tPusaka += d.pusakaAbah;
 
+                // Cek Role untuk show Input vs Text
+                let wakAjiInput = window.currentUserRole === 'admin' 
+                    ? `<input type="number" class="input-kos" value="${d.wakAji}" onchange="window.updateCost('${d.monthKey}', 'wakAji', this.value)">` 
+                    : d.wakAji.toFixed(2);
+                let bilUpahInput = window.currentUserRole === 'admin' 
+                    ? `<input type="number" class="input-kos" value="${d.displayBilUpah}" onchange="window.updateCost('${d.monthKey}', 'bilUpah', this.value)">` 
+                    : d.displayBilUpah.toFixed(2);
+
                 bodyCost.innerHTML += `<tr>
                     <td>${d.monthName}</td>
                     <td class="col-sum-masuk">${d.totalMasuk.toFixed(2)}</td>
-                    <td class="col-kos">
-                        <input type="number" class="input-kos" value="${d.wakAji}" 
-                        onchange="window.updateCost('${d.monthKey}', 'wakAji', this.value)">
-                    </td>
+                    <td class="col-kos">${wakAjiInput}</td>
                     <td class="col-kos">${d.selenggara.toFixed(2)}</td>
-                    <td class="col-kos">
-                        <input type="number" class="input-kos" value="${d.displayBilUpah}" 
-                        onchange="window.updateCost('${d.monthKey}', 'bilUpah', this.value)">
-                    </td>
+                    <td class="col-kos">${bilUpahInput}</td>
                     <td class="col-clean">${d.bersih.toFixed(2)}</td>
                     <td class="col-pusaka">${d.makHalf.toFixed(2)}</td>
                     <td class="col-pusaka">${d.pusakaAbah.toFixed(2)}</td>
@@ -652,11 +728,13 @@
         }
 
         window.updateCost = async function(monthKey, type, value) {
+            if(window.currentUserRole !== 'admin') return;
             const numVal = parseFloat(value) || 0;
             await setDoc(doc(db, "kos_bulanan_faraid", monthKey), { [type]: numVal }, { merge: true });
         }
 
         window.addData = async function() {
+            if(window.currentUserRole !== 'admin') return;
             const btn = document.querySelector('.btn-add');
             btn.innerText = "Menyimpan..."; btn.disabled = true;
 
@@ -668,32 +746,86 @@
             let keluar = parseFloat(document.getElementById('inputKeluar').value) || 0;
 
             if (!date || (masuk === 0 && keluar === 0)) {
-                alert("Sila isi Tarikh & Amaun."); btn.innerText = "+ Tambah Data"; btn.disabled = false; return;
+                alert("Isi Tarikh & Amaun."); btn.innerText = "+ Tambah Data"; btn.disabled = false; return;
             }
 
             try {
                 await addDoc(tablesCollection, {
                     timestamp: Date.now(),
                     date, category, feldaDate, desc, masuk, keluar,
-                    createdBy: auth.currentUser.email
+                    createdBy: auth.currentUser ? auth.currentUser.email : 'Admin'
                 });
                 
                 document.getElementById('inputDesc').value = '';
                 document.getElementById('inputMasuk').value = '';
                 document.getElementById('inputKeluar').value = '';
-                alert("Berjaya disimpan!");
+                alert("Berjaya Disimpan!");
             } catch (e) { console.error(e); alert("Ralat: " + e.message); }
             btn.innerText = "+ Tambah Data"; btn.disabled = false;
         }
 
         window.deleteRow = async function(id) {
-            if(confirm("Padam rekod ini?")) await deleteDoc(doc(db, "transaksi_faraid", id));
+            if(window.currentUserRole !== 'admin') return;
+            if(confirm("Padam rekod ini dari Database?")) await deleteDoc(doc(db, "transaksi_faraid", id));
         }
 
+        // --- CETAK SECTION 5 ---
+        window.printSection5 = function() {
+            document.body.classList.add('print-sec5-mode');
+            setTimeout(function() {
+                window.print();
+                setTimeout(function() { document.body.classList.remove('print-sec5-mode'); }, 1000);
+            }, 500);
+        }
+
+        // --- CETAK SLIP MAK (SECTION 4) ---
+        window.printMakSlip = function() {
+            const selectedMonth = document.getElementById('slipMonthInputMak').value; 
+            if (!selectedMonth) { 
+                alert("Sila pilih bulan dahulu."); return; 
+            }
+            if (!window.globalSummaryData) return;
+
+            const d = window.globalSummaryData.find(item => item.monthKey === selectedMonth);
+            if (!d) { alert("Tiada rekod untuk bulan: " + selectedMonth); return; }
+            if (d.monthKey < "2026-02") { alert("Simulasi Faraid Mak hanya bermula Februari 2026."); return;}
+
+            const hartaMak = d.makHalf + d.sMak;
+            const ijatShare = hartaMak * 0.5;
+            const yatiShare = hartaMak * 0.25;
+            const elaShare = hartaMak * 0.25;
+
+            const slipArea = document.getElementById('customSlipArea');
+            slipArea.innerHTML = `
+            <div class="slip-card">
+                <div class="slip-header">
+                    Slip Simulasi Faraid Harta Mak<br>
+                    Tempoh: ${d.monthName}
+                </div>
+                <div class="slip-group">
+                    <div class="slip-row"><span>Jumlah Harta Mak (1/2 Harta + 400/2304) :</span><span style="font-weight:bold;">RM ${hartaMak.toFixed(2)}</span></div>
+                </div>
+                <div class="slip-group" style="margin-top:20px;">
+                    <div class="slip-row"><span>Ijat (1/2 bahagian) :</span><span>RM ${ijatShare.toFixed(2)}</span></div>
+                    <div class="slip-row"><span>Yati (1/4 bahagian) :</span><span>RM ${yatiShare.toFixed(2)}</span></div>
+                    <div class="slip-row"><span>Ela (1/4 bahagian) :</span><span>RM ${elaShare.toFixed(2)}</span></div>
+                    <div class="slip-row slip-total"><span>JUMLAH AGIHAN :</span><span>RM ${hartaMak.toFixed(2)}</span></div>
+                </div>
+                <div style="margin-top:20px; text-align:center; font-size:10px; color:#555;">*Dicetak pada: ${new Date().toLocaleString()}</div>
+            </div>`;
+            
+            document.body.classList.add('print-slip-mode');
+            setTimeout(function() {
+                window.print();
+                setTimeout(function() { document.body.classList.remove('print-slip-mode'); }, 1000);
+            }, 500);
+        }
+
+        // --- CETAK SLIP ABAH (SECTION 2) ---
         window.printCustomSlip = function() {
             const selectedMonth = document.getElementById('slipMonthInput').value; 
             if (!selectedMonth) { 
-                alert("Sila pilih bulan dahulu."); document.getElementById('slipMonthInput').focus(); return; 
+                alert("Sila pilih bulan dahulu."); return; 
             }
             if (!window.globalSummaryData || window.globalSummaryData.length === 0) { alert("Tiada data."); return; }
 
@@ -701,8 +833,6 @@
             if (!d) { alert("Tiada rekod untuk bulan: " + selectedMonth); return; }
 
             const slipArea = document.getElementById('customSlipArea');
-            slipArea.innerHTML = ''; 
-            
             const totalGroupA = d.sMak + d.sYati + d.sEla + d.sIjat;
 
             let slipHtml = `
@@ -741,6 +871,7 @@
         const yyyy = now.getFullYear();
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         document.getElementById('slipMonthInput').value = `${yyyy}-${mm}`;
+        document.getElementById('slipMonthInputMak').value = `${yyyy}-${mm}`;
         document.getElementById('filterGabunganMonth').value = `${yyyy}-${mm}`; 
 
         window.toggleFeldaInput = function() {
@@ -762,12 +893,14 @@
             ['Tarikh', 'Kategori', 'Tarikh Felda', 'Catatan', 'Masuk', 'Keluar', 'Baki'].forEach(h => xml += `<Cell ss:StyleID="sHeader"><Data ss:Type="String">${h}</Data></Cell>`);
             xml += '</Row>';
             let bal = 0;
-            window.globalRecords.forEach(r => {
-                bal += parseFloat(r.masuk) - parseFloat(r.keluar);
-                xml += `<Row><Cell><Data ss:Type="String">${r.date}</Data></Cell><Cell><Data ss:Type="String">${r.category}</Data></Cell><Cell><Data ss:Type="String">${r.feldaDate||''}</Data></Cell><Cell><Data ss:Type="String">${r.desc}</Data></Cell><Cell><Data ss:Type="Number">${r.masuk}</Data></Cell><Cell><Data ss:Type="Number">${r.keluar}</Data></Cell><Cell><Data ss:Type="Number">${bal}</Data></Cell></Row>`;
+            
+            let sortedRec = [...window.globalRecords].reverse(); // Recalculate correctly for Excel
+            let exportBal = 0;
+            sortedRec.forEach(r => {
+                exportBal += parseFloat(r.masuk) - parseFloat(r.keluar);
+                xml += `<Row><Cell><Data ss:Type="String">${r.date}</Data></Cell><Cell><Data ss:Type="String">${r.category}</Data></Cell><Cell><Data ss:Type="String">${r.feldaDate||''}</Data></Cell><Cell><Data ss:Type="String">${r.desc}</Data></Cell><Cell><Data ss:Type="Number">${r.masuk}</Data></Cell><Cell><Data ss:Type="Number">${r.keluar}</Data></Cell><Cell><Data ss:Type="Number">${exportBal}</Data></Cell></Row>`;
             });
-            xml += '</Table></Worksheet>';
-            xml += '</Workbook>';
+            xml += '</Table></Worksheet></Workbook>';
             let blob = new Blob([xml], {type: "application/vnd.ms-excel"});
             let link = document.createElement("a");
             link.href = window.URL.createObjectURL(blob);
