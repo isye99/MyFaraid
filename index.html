@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V4.4 - Format Jadual Sec 5)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V4.5)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -64,9 +64,9 @@
         .col-mak-total { background-color: #d1f2eb; font-weight: bold; color: #0e6251; border-right: 2px solid #000; }
         .col-anak-mak { background-color: #fff8e1; color: #795548; font-weight: bold; }
         
-        /* Sec 5 Layout Fixes (Lebar Sama & Huruf Besar) */
+        /* Sec 5 Layout Fixes */
         .sec5-table { table-layout: fixed; width: 100%; min-width: 600px; }
-        .sec5-table th { width: 20%; text-transform: uppercase; white-space: normal; } /* Paksa 20% setiap kolum & Huruf Besar */
+        .sec5-table th { width: 20%; text-transform: uppercase; white-space: normal; } 
         .col-total-final { background-color: #2e86c1; color: white; font-weight: bold; border-left: 2px solid #000; }
         
         .ratio-text { display: block; font-size: 10px; color: #555; font-style: italic; margin-top: 2px; }
@@ -105,7 +105,6 @@
             @page { size: landscape; margin: 10mm; } 
             body { zoom: 100%; padding: 0; background: white; }
             
-            /* PEMBETULAN UTAMA: BUANG POSITION STICKY SEMASA PRINT */
             th { position: static !important; }
             
             .table-wrapper, .summary-wrapper, .maintenance-box { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
@@ -127,7 +126,6 @@
             body.print-sec5-mode #section5-container, body.print-sec5-mode #section5-container * { visibility: visible; }
             body.print-sec5-mode #section5-container { position: absolute; left: 0; top: 0; width: 100%; }
 
-            /* Force page break every 2 months for Section 5 */
             .page-break-after-2 { page-break-after: always; }
             
             h3.print-only-title { display: block !important; color: black; border-bottom: 2px solid black; margin-top: 0; padding-top: 0; }
@@ -158,7 +156,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V4.4)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V4.5)</h2>
         
         <div class="input-container">
             <div class="data-entry-fields" id="dataEntryFields">
@@ -219,10 +217,26 @@
             </table>
         </div>
 
-        <h3 class="print-only-title">2. Slip Agihan Faraid</h3>
+        <h3>2. Rekod Selenggara Kebun</h3>
+        <div class="maintenance-box">
+            <div class="maintenance-row">
+                <span>(a) Dana Selenggara Terkumpul (20% Dari Hasil)</span>
+                <span style="color:green; font-weight:bold" id="danaTerkumpulDisplay">RM 0.00</span>
+            </div>
+            <div class="maintenance-row">
+                <span>(b) Jumlah Bayaran Selenggara Kebun (Telah Diguna)</span>
+                <span style="color:red; font-weight:bold" id="bayaranSelenggaraDisplay">RM 0.00</span>
+            </div>
+            <div class="maintenance-row maintenance-total">
+                <span>(c) Baki Duit Selenggara (a - b)</span>
+                <span style="color:blue" id="bakiSelenggaraDisplay">RM 0.00</span>
+            </div>
+        </div>
+
+        <h3 class="print-only-title">3. Slip Agihan Faraid (abah)</h3>
         <div id="faraidSection">
             <div class="section-controls">
-                <h3>2. Slip Agihan Faraid</h3>
+                <h3>3. Slip Agihan Faraid (abah)</h3>
                 <div style="display:flex; gap: 5px; align-items: center; flex-wrap:wrap;">
                     <label style="margin:0;">Pilih Bulan:</label>
                     <input type="month" id="slipMonthInput" style="padding: 5px;">
@@ -252,22 +266,6 @@
                     </thead>
                     <tbody id="summaryBodyDist"></tbody>
                 </table>
-            </div>
-        </div>
-
-        <h3>3. Rekod Selenggara Kebun</h3>
-        <div class="maintenance-box">
-            <div class="maintenance-row">
-                <span>(a) Dana Selenggara Terkumpul (20% Dari Hasil)</span>
-                <span style="color:green; font-weight:bold" id="danaTerkumpulDisplay">RM 0.00</span>
-            </div>
-            <div class="maintenance-row">
-                <span>(b) Jumlah Bayaran Selenggara Kebun (Telah Diguna)</span>
-                <span style="color:red; font-weight:bold" id="bayaranSelenggaraDisplay">RM 0.00</span>
-            </div>
-            <div class="maintenance-row maintenance-total">
-                <span>(c) Baki Duit Selenggara (a - b)</span>
-                <span style="color:blue" id="bakiSelenggaraDisplay">RM 0.00</span>
             </div>
         </div>
 
@@ -352,7 +350,6 @@
         let currentPage = 1;
         const itemsPerPage = 20;
 
-        // --- ROLE RESTRICTIONS LOGIC ---
         function applyRoleRestrictions() {
             if (window.currentUserRole === 'viewer') {
                 document.getElementById('dataEntryFields').style.display = 'none';
@@ -365,7 +362,6 @@
             }
         }
 
-        // --- AUTH ---
         window.loginGoogle = async () => {
             const provider = new GoogleAuthProvider();
             try {
@@ -435,7 +431,6 @@
             });
         }
 
-        // --- PAGINATION LOGIC ---
         window.changePage = function(dir) {
             currentPage += dir;
             renderMainTableOnly();
@@ -540,7 +535,6 @@
             });
         }
 
-        // --- FILTER FUNCTION UNTUK BAHAGIAN 5 ---
         window.applyGabunganFilter = function() {
             if (!window.globalSummaryData) return;
             const selectedMonth = document.getElementById('filterGabunganMonth').value;
@@ -558,7 +552,6 @@
             window.applyGabunganFilter();
         }
 
-        // --- SPLIT TABLE SEC 5 UNTUK PRINT (DIKEMASKINI: SEC5-TABLE KELAS BARU) ---
         function renderCombinedSummarySplit(data) {
             const container = document.getElementById('summaryGabunganContainer');
             container.innerHTML = '';
@@ -575,7 +568,6 @@
                 const isLastChunk = (i + chunkSize >= data.length);
                 const pageBreakClass = !isLastChunk ? 'page-break-after-2' : '';
 
-                // GUNA KELAS sec5-table UNTUK MEMAKSA LEBAR 20% DAN HURUF BESAR
                 let tableHTML = `
                 <div class="summary-wrapper ${pageBreakClass}">
                     <table class="summary-table sec5-table">
@@ -785,7 +777,6 @@
             if(confirm("Padam rekod ini dari Database?")) await deleteDoc(doc(db, "transaksi_faraid", id));
         }
 
-        // --- CETAK SECTION 5 ---
         window.printSection5 = function() {
             document.body.classList.add('print-sec5-mode');
             setTimeout(function() {
@@ -794,7 +785,6 @@
             }, 500);
         }
 
-        // --- CETAK SLIP MAK (SECTION 4) ---
         window.printMakSlip = function() {
             const selectedMonth = document.getElementById('slipMonthInputMak').value; 
             if (!selectedMonth) { alert("Sila pilih bulan dahulu."); return; }
@@ -835,7 +825,6 @@
             }, 500);
         }
 
-        // --- CETAK SLIP ABAH (SECTION 2) ---
         window.printCustomSlip = function() {
             const selectedMonth = document.getElementById('slipMonthInput').value; 
             if (!selectedMonth) { alert("Sila pilih bulan dahulu."); return; }
