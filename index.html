@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V4.3 - Print Fix)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V4.4 - Format Jadual Sec 5)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -63,6 +63,10 @@
         
         .col-mak-total { background-color: #d1f2eb; font-weight: bold; color: #0e6251; border-right: 2px solid #000; }
         .col-anak-mak { background-color: #fff8e1; color: #795548; font-weight: bold; }
+        
+        /* Sec 5 Layout Fixes (Lebar Sama & Huruf Besar) */
+        .sec5-table { table-layout: fixed; width: 100%; min-width: 600px; }
+        .sec5-table th { width: 20%; text-transform: uppercase; white-space: normal; } /* Paksa 20% setiap kolum & Huruf Besar */
         .col-total-final { background-color: #2e86c1; color: white; font-weight: bold; border-left: 2px solid #000; }
         
         .ratio-text { display: block; font-size: 10px; color: #555; font-style: italic; margin-top: 2px; }
@@ -154,7 +158,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V4.3)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V4.4)</h2>
         
         <div class="input-container">
             <div class="data-entry-fields" id="dataEntryFields">
@@ -554,35 +558,34 @@
             window.applyGabunganFilter();
         }
 
-        // --- NEW LOGIC: SPLIT TABLE SEC 5 UNTUK PRINT ---
+        // --- SPLIT TABLE SEC 5 UNTUK PRINT (DIKEMASKINI: SEC5-TABLE KELAS BARU) ---
         function renderCombinedSummarySplit(data) {
             const container = document.getElementById('summaryGabunganContainer');
             container.innerHTML = '';
 
             if(data.length === 0) {
-                container.innerHTML = `<div class="summary-wrapper"><table class="summary-table"><tr><td style="text-align:center; padding:15px; color:#555;">Tiada rekod.</td></tr></table></div>`;
+                container.innerHTML = `<div class="summary-wrapper"><table class="summary-table sec5-table"><tr><td style="text-align:center; padding:15px; color:#555;">Tiada rekod.</td></tr></table></div>`;
                 return;
             }
 
-            // Pecahkan array data kepada kumpulan kecil (chunks of 2)
             const chunkSize = 2;
             for (let i = 0; i < data.length; i += chunkSize) {
                 const chunk = data.slice(i, i + chunkSize);
                 
-                // Tambah class page-break jika bukan chunk terakhir
                 const isLastChunk = (i + chunkSize >= data.length);
                 const pageBreakClass = !isLastChunk ? 'page-break-after-2' : '';
 
+                // GUNA KELAS sec5-table UNTUK MEMAKSA LEBAR 20% DAN HURUF BESAR
                 let tableHTML = `
                 <div class="summary-wrapper ${pageBreakClass}">
-                    <table class="summary-table">
+                    <table class="summary-table sec5-table">
                         <thead>
                             <tr>
-                                <th class="col-date">Bulan</th>
-                                <th class="col-waris">Nama Waris</th>
-                                <th class="col-kos">Dari Arwah Abah (RM)</th>
-                                <th class="col-kos">Dari Arwah Mak (RM)</th>
-                                <th class="col-total-final">JUMLAH BESAR (RM)</th>
+                                <th>BULAN</th>
+                                <th>NAMA WARIS</th>
+                                <th>DARI ARWAH ABAH (RM)</th>
+                                <th>DARI ARWAH MAK (RM)</th>
+                                <th>JUMLAH BESAR (RM)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -610,7 +613,7 @@
                         const total = w.abah + w.mak;
                         tableHTML += `<tr>
                             <td></td>
-                            <td style="font-weight:bold;">${w.nama}</td>
+                            <td style="font-weight:bold; text-align:center;">${w.nama}</td>
                             <td style="text-align:right;">${w.abah.toFixed(2)}<span class="ratio-text">(${w.ratioAbah})</span></td>
                             <td style="text-align:right;">${w.mak.toFixed(2)}<span class="ratio-text">(${w.ratioMak})</span></td>
                             <td class="col-total-final" style="text-align:right;">${total.toFixed(2)}<span class="ratio-text-dark">(${w.ratioFinal})</span></td>
