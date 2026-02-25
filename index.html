@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V4.2)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V4.3 - Print Fix)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -37,6 +37,8 @@
         .table-wrapper { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 10px;}
         table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; } 
         th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+        
+        /* Sticky hanya di skrin, dimatikan semasa print */
         th { background-color: #2c3e50; color: white; text-align: center; white-space: nowrap; position: sticky; top: 0; }
         tr:nth-child(even) { background-color: #f9f9f9; } 
         
@@ -98,6 +100,10 @@
             .btn-logout, #loginContainer, .input-container, .btn-clear, .summary-box, .btn-pdf, .btn-export, .btn-add, button, .section-controls, #paginationControls { display: none !important; }
             @page { size: landscape; margin: 10mm; } 
             body { zoom: 100%; padding: 0; background: white; }
+            
+            /* PEMBETULAN UTAMA: BUANG POSITION STICKY SEMASA PRINT */
+            th { position: static !important; }
+            
             .table-wrapper, .summary-wrapper, .maintenance-box { box-shadow: none; border: 1px solid #000; overflow: visible; margin-bottom: 10px; page-break-inside: avoid; }
             table { min-width: auto; width: 100%; font-size: 11pt; }
             .input-kos { border: none; background: transparent; text-align: right; width: auto; padding: 0; }
@@ -120,7 +126,7 @@
             /* Force page break every 2 months for Section 5 */
             .page-break-after-2 { page-break-after: always; }
             
-            h3.print-only-title { display: block !important; color: black; border-bottom: 2px solid black; }
+            h3.print-only-title { display: block !important; color: black; border-bottom: 2px solid black; margin-top: 0; padding-top: 0; }
             @page { size: auto; margin: 5mm; } 
         }
         h3.print-only-title { display: none; }
@@ -148,7 +154,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V4.2)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V4.3)</h2>
         
         <div class="input-container">
             <div class="data-entry-fields" id="dataEntryFields">
