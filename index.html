@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kewangan & Faraid Keluarga (V4.6 - Cetak Slip Gabungan)</title>
+    <title>Sistem Kewangan & Faraid Keluarga (V4.7 - Format Cetak Sec 5)</title>
     
     <style>
         /* --- STYLE UTAMA --- */
@@ -148,7 +148,7 @@
 
     <div id="mainApp">
         <button class="btn-logout" onclick="window.logout()">Log Keluar</button>
-        <h2>Sistem Kewangan & Faraid Keluarga (V4.6)</h2>
+        <h2>Sistem Kewangan & Faraid Keluarga (V4.7)</h2>
         
         <div class="input-container">
             <div class="data-entry-fields" id="dataEntryFields">
@@ -557,7 +557,7 @@
             window.applyGabunganFilter();
         }
 
-        // Paparan UI Biasa untuk Sec 5 (Bukan cetakan)
+        // Paparan UI Biasa (Screen)
         function renderCombinedSummaryView(data) {
             const tbody = document.getElementById('summaryGabungan');
             tbody.innerHTML = '';
@@ -598,7 +598,7 @@
             });
         }
 
-        // --- NEW LOGIC: CETAK SLIP GABUNGAN (SEC 5) ---
+        // --- NEW LOGIC: CETAK SLIP GABUNGAN (SEC 5) FORMAT BARU (TANPA KOTAK KELABU, FONT HITAM BOLD) ---
         window.printGabunganSlip = function() {
             if (!window.globalSummaryData || window.globalSummaryData.length === 0) { alert("Tiada data."); return; }
 
@@ -639,43 +639,43 @@
                     totalMak += w.mak;
                     totalBesar += total;
 
+                    // Buang dotted line, ganti dengan padding sahaja untuk nampak bersih
                     rowsHtml += `
-                        <tr style="border-bottom: 1px dotted #ccc;">
-                            <td style="padding: 10px 0; font-weight:bold; font-size:12pt; text-align:left;">${w.nama}</td>
-                            <td style="text-align:right; padding: 10px 0; font-size:12pt;">${w.abah.toFixed(2)}<br><span style="font-size:10px; color:#555;">(${w.ratioAbah})</span></td>
-                            <td style="text-align:right; padding: 10px 0; font-size:12pt;">${w.mak.toFixed(2)}<br><span style="font-size:10px; color:#555;">(${w.ratioMak})</span></td>
-                            <td style="text-align:right; padding: 10px 0; font-weight:bold; font-size:12pt;">${total.toFixed(2)}<br><span style="font-size:10px; color:#555;">(${w.ratioFinal})</span></td>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight:bold; font-size:12pt; text-align:left; border:none;">${w.nama}</td>
+                            <td style="text-align:center; padding: 10px 0; font-size:12pt; border:none;">${w.abah.toFixed(2)}<br><span style="font-size:10px; color:#555;">(${w.ratioAbah})</span></td>
+                            <td style="text-align:center; padding: 10px 0; font-size:12pt; border:none;">${w.mak.toFixed(2)}<br><span style="font-size:10px; color:#555;">(${w.ratioMak})</span></td>
+                            <td style="text-align:center; padding: 10px 0; font-weight:bold; font-size:12pt; border:none;">${total.toFixed(2)}<br><span style="font-size:10px; color:#555;">(${w.ratioFinal})</span></td>
                         </tr>
                     `;
                 });
 
-                // Letak page-break untuk setiap bulan supaya print tepat 1 muka surat
                 const pageBreakStyle = index < dataToPrint.length - 1 ? 'page-break-after: always;' : '';
 
                 allSlipsHtml += `
-                <div class="slip-card" style="${pageBreakStyle}">
-                    <div class="slip-header">
+                <div class="slip-card" style="${pageBreakStyle} border: none; padding: 0;">
+                    <div class="slip-header" style="border-bottom:none;">
                         PENYATA RUMUSAN KESELURUHAN (GABUNGAN)<br>
                         <span style="font-size: 12pt; font-weight:normal;">Tempoh: ${d.monthName}</span>
                     </div>
                     <table style="width:100%; border-collapse: collapse; margin-top: 15px;">
                         <thead>
-                            <tr style="border-bottom: 2px solid #000; background-color: #f9f9f9;">
-                                <th style="text-align:left; padding:10px 0; font-size:11pt;">WARIS</th>
-                                <th style="text-align:right; padding:10px 0; font-size:11pt;">DARI ABAH (RM)</th>
-                                <th style="text-align:right; padding:10px 0; font-size:11pt;">DARI MAK (RM)</th>
-                                <th style="text-align:right; padding:10px 0; font-size:11pt;">JUMLAH (RM)</th>
+                            <tr style="border-top: 2px solid #000; border-bottom: 2px solid #000;">
+                                <th style="text-align:left; padding:10px 0; font-size:11pt; color:black; font-weight:bold; background:transparent; border:none;">WARIS</th>
+                                <th style="text-align:center; padding:10px 0; font-size:11pt; color:black; font-weight:bold; background:transparent; border:none;">DARI ABAH (RM)</th>
+                                <th style="text-align:center; padding:10px 0; font-size:11pt; color:black; font-weight:bold; background:transparent; border:none;">DARI MAK (RM)</th>
+                                <th style="text-align:center; padding:10px 0; font-size:11pt; color:black; font-weight:bold; background:transparent; border:none;">JUMLAH (RM)</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${rowsHtml}
                         </tbody>
                         <tfoot>
-                            <tr style="border-top: 2px solid #000; border-bottom: 4px double #000; font-weight:bold; background-color: #eee;">
-                                <td style="padding: 12px 0; text-align:left; font-size:12pt;">JUMLAH BESAR</td>
-                                <td style="padding: 12px 0; text-align:right; font-size:12pt;">${totalAbah.toFixed(2)}</td>
-                                <td style="padding: 12px 0; text-align:right; font-size:12pt;">${totalMak.toFixed(2)}</td>
-                                <td style="padding: 12px 0; text-align:right; font-size:12pt;">${totalBesar.toFixed(2)}</td>
+                            <tr style="border-top: 2px solid #000; border-bottom: 4px double #000; font-weight:bold;">
+                                <td style="padding: 12px 0; text-align:left; font-size:12pt; border:none; background:transparent;">JUMLAH BESAR</td>
+                                <td style="padding: 12px 0; text-align:center; font-size:12pt; border:none; background:transparent;">${totalAbah.toFixed(2)}</td>
+                                <td style="padding: 12px 0; text-align:center; font-size:12pt; border:none; background:transparent;">${totalMak.toFixed(2)}</td>
+                                <td style="padding: 12px 0; text-align:center; font-size:12pt; border:none; background:transparent;">${totalBesar.toFixed(2)}</td>
                             </tr>
                         </tfoot>
                     </table>
